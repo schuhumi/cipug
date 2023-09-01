@@ -214,7 +214,7 @@ def check_dependencies(config: Config):
     tools = ["skopeo"]
     
     if config["SERVICE_STOP_START"]:
-        tools.append(config["COMPOSE_TOOL"])
+        tools.append(config["COMPOSE_TOOL"].split(" ")[0])
     else:
         log.vverbose(
             "Skipping looking for a compose tool, as stopping "
@@ -438,7 +438,7 @@ class Updater():
             self.services.append(compose_file.parent)
         
         if len(self.services)==1:
-            log.vebose("Found one service:")
+            log.verbose("Found one service:")
         elif len(self.services)>1:
             log.verbose(f"Found {len(self.services)} services:")
         else:
@@ -506,7 +506,7 @@ class Updater():
         if config["SERVICE_STOP_START"]:
             log(f"stopping service \"{svc_name}\"..")
             ret = subprocess.run(
-                [config["COMPOSE_TOOL"], "down"],
+                config["COMPOSE_TOOL"].split(" ") + ["down"],
                 cwd=folder
             ).returncode
             if ret != 0:
@@ -543,7 +543,7 @@ class Updater():
         if config["SERVICE_STOP_START"]:
             log(f"Starting \"{svc_name}\" service..")
             ret = subprocess.run(
-                [config["COMPOSE_TOOL"], "up", "-d"],
+                config["COMPOSE_TOOL"].split(" ") + ["up", "-d"],
                 cwd=folder
             ).returncode
             if ret != 0:

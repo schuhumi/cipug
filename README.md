@@ -63,7 +63,7 @@ Name | Purpose | Values | Default
 `CIPUG_SERVICES_ROOT` | Folder where subvolumes with each a service in them reside | some absolute path | *unset*
 `CIPUG_COMPOSE_FILE_NAME` | What compose file to look out for at each service | Just the filename. This means all services need to have the same compose-file filename! | `compose.yml`
 `CIPUG_ENV_FILE_NAME` | What environment file to look out for at each service | Just the filename. This means all services need to have the same environment-file filename! | `.env`
-`CIPUG_COMPOSE_TOOL` | Used to stop (`down`) and start (`up -d`) services | `podman-compose`, `docker-compose` or any other such tool| `podman-compose`
+`CIPUG_COMPOSE_TOOL` | Used to stop (`down`) and start (`up -d`) services | `podman-compose`, `docker-compose`, `docker compose` or any other such tool| `podman-compose`
 `CIPUG_SERVICE_STOP_START` | Whether to stop services before and start them up again after an image update | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
 `CIPUG_SERVICE_SNAPSHOT` | Whether to create a snapshot using snapper before setting up a new container image | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
 `CIPUG_VERBOSITY` | Sets exhaustiveness of logs | `0` = just errors, `1` = normal, `2` = verbose, `3` = highly verbose | `1`
