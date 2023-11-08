@@ -127,6 +127,7 @@ class Config(dict):
             "COMPOSE_TOOL": ("podman-compose", str),
             "SERVICE_STOP_START": ("true", Str2Bool),
             "SERVICE_SNAPSHOT": ("true", Str2Bool),
+            "SERVICE_PULL": ("true", Str2Bool),
             "COMPOSE_FILE_NAME": ("compose.yml", str),
             "ENV_FILE_NAME": (".env", str),
             "CACHE_DURATION": (60*60, int),
@@ -503,19 +504,19 @@ class Updater():
         
         log(f"Changes pending for \"{svc_name}\"")
         
-        if config["SERVICE_STOP_START"]:
-            log(f"stopping service \"{svc_name}\"..")
-            ret = subprocess.run(
-                config["COMPOSE_TOOL"].split(" ") + ["down"],
-                cwd=folder
-            ).returncode
-            if ret != 0:
-                log.error(
-                    f"Cannot update service \"{svc_name}\", because "
-                    f"stopping it failed (returncode {ret})"
-                )
-                return
-                
+        log(f"Ensuring permission for \"{config['COMPOSE_TOOL']}\"..")
+        ret = subprocess.run(
+            config["COMPOSE_TOOL"].split(" ") + ["ps"],
+            cwd=folder,
+            capture_output=True
+        ).returncode
+        if ret != 0:
+            log.error(
+                f"Cannot update service \"{svc_name}\", because "
+                f"cannot use \"{config['COMPOSE_TOOL']}\" (returncode {ret})"
+            )
+            return
+        
         if config["SERVICE_SNAPSHOT"]:
             log(f"Taking a snapshot of {folder} using snapper..")
             try:
@@ -529,7 +530,7 @@ class Updater():
                     f"snapshotting failed: {e}"
                 )
                 return
-        
+                
         log(f"Writing updated {env_file} configuration..")
         try:
             env.write()
@@ -539,6 +540,32 @@ class Updater():
                 f"writing .env file failed: {e}"
             )
             return
+            
+        if config["SERVICE_PULL"]:
+            log(f"pulling images for service \"{svc_name}\"..")
+            ret = subprocess.run(
+                config["COMPOSE_TOOL"].split(" ") + ["pull"],
+                cwd=folder
+            ).returncode
+            if ret != 0:
+                log.error(
+                    f"Cannot update service \"{svc_name}\", because "
+                    f"pulling images failed (returncode {ret})"
+                )
+                return
+        
+        if config["SERVICE_STOP_START"]:
+            log(f"stopping service \"{svc_name}\"..")
+            ret = subprocess.run(
+                config["COMPOSE_TOOL"].split(" ") + ["down"],
+                cwd=folder
+            ).returncode
+            if ret != 0:
+                log.error(
+                    f"Cannot update service \"{svc_name}\", because "
+                    f"stopping it failed (returncode {ret})"
+                )
+                return
         
         if config["SERVICE_STOP_START"]:
             log(f"Starting \"{svc_name}\" service..")
