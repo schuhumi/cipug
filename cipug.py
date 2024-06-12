@@ -125,9 +125,11 @@ class Config(dict):
             "VERBOSITY": (1, int),
             "SERVICES_ROOT": (unset, Path),
             "COMPOSE_TOOL": ("podman-compose", str),
+            "CONTAINER_TOOL": ("podman", str),
             "SERVICE_STOP_START": ("true", Str2Bool),
             "SERVICE_SNAPSHOT": ("true", Str2Bool),
             "SERVICE_PULL": ("true", Str2Bool),
+            "PRUNE_IMAGES": ("true", Str2Bool),
             "COMPOSE_FILE_NAME": ("compose.yml", str),
             "ENV_FILE_NAME": (".env", str),
             "CACHE_DURATION": (60*60, int),
@@ -236,6 +238,18 @@ def check_dependencies(config: Config):
             log.vverbose(f"Found tool: {out}")
         except FileNotFoundError:
             log.error(f"Could not find tool \"{tool}\", cannot proceed.", exit_code=3)
+
+
+def prune_images(config: Config):
+    if config["PRUNE_IMAGES"]:
+        log(f"Pruning images..")
+        ret = subprocess.run(
+            config["CONTAINER_TOOL"].split(" ") + ["image", "prune", "-f"]
+        ).returncode
+        if ret != 0:
+            log.error(
+                f"Failed to start service \"{svc_name}\" (returncode {ret})"
+            )
 
 
 class Env(dict):
@@ -593,6 +607,7 @@ if __name__ == "__main__":
         )
     config = Config()
     check_dependencies(config)
+    prune_images(config)
     resolver = Image_Version_Resolver(config)
     snapper = Snapper()
     updater = Updater(config=config, resolver=resolver, snapper=snapper)

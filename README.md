@@ -64,8 +64,10 @@ Name | Purpose | Values | Default
 `CIPUG_COMPOSE_FILE_NAME` | What compose file to look out for at each service | Just the filename. This means all services need to have the same compose-file filename! | `compose.yml`
 `CIPUG_ENV_FILE_NAME` | What environment file to look out for at each service | Just the filename. This means all services need to have the same environment-file filename! | `.env`
 `CIPUG_COMPOSE_TOOL` | Used to stop (`down`) and start (`up -d`) services | `podman-compose`, `docker-compose`, `docker compose` or any other such tool| `podman-compose`
+`CIPUG_CONTAINER_TOOL` | Used to prune the images | `podman`, `docker` or any such tool | `podman`
 `CIPUG_SERVICE_STOP_START` | Whether to stop services before and start them up again after an image update | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
 `CIPUG_SERVICE_SNAPSHOT` | Whether to create a snapshot using snapper before setting up a new container image | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
+`CIPUG_PRUNE_IMAGES` | Whether to prune images | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
 `CIPUG_VERBOSITY` | Sets exhaustiveness of logs | `0` = just errors, `1` = normal, `2` = verbose, `3` = highly verbose | `1`
 `CIPUG_CACHE_DURATION` | cipug caches image-tag resolutions to not exhaust docker-hub's rate limit so quickly | integer amount of seconds | `3600` (1h)
 `CIPUG_CACHE_LOCATION` | location where to store the cache in the form of a json file | some path | `<tmp-directory>/cipug_cache.json` 
