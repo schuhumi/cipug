@@ -487,39 +487,39 @@ class Updater():
         )
         # Dict size will change, hence copy env.keys into a list now
         for key in list(env.keys()):
-            match key.split("_"):
-                case ["SERVICE", entry_name, "IMAGE", "TAGGED"]:
+            if key.startswith("SERVICE_") and key.endswith("_IMAGE_TAGGED"):
+                entry_name = key.removeprefix("SERVICE_").removesuffix("_IMAGE_TAGGED")
+                log.verbose(
+                    f"Found tagged image entry for \"{entry_name}\": "
+                    f"{env[key]}"
+                )
+
+                current_hash = env.get(
+                    "_".join(["SERVICE", entry_name, "IMAGE", "HASHED"]),
+                    None
+                )
+                if current_hash is None:
                     log.verbose(
-                        f"Found tagged image entry for \"{entry_name}\": "
-                        f"{env[key]}"
+                        f"There's no hashed image reference for \"{entry_name}\""
+                        f" in {config['ENV_FILE_NAME']} currently"
                     )
+                else:
+                    log.verbose(
+                        "The current hashed image reference for "
+                        f"\"{entry_name}\" is: {current_hash}")
 
-                    current_hash = env.get(
-                        "_".join(["SERVICE", entry_name, "IMAGE", "HASHED"]),
-                        None
+                new_hash = self.resolver.resolve_image_version(env[key])
+
+                if new_hash == current_hash:
+                    log(f"{entry_name}: {env[key]} stays at {current_hash}")
+                else:
+                    env[
+                        "_".join(["SERVICE", entry_name, "IMAGE", "HASHED"])
+                    ] = new_hash
+                    log(
+                        f"{colors.Green}{entry_name}: {env[key]} is "
+                        f"now at {new_hash}{colors.Reset}"
                     )
-                    if current_hash is None:
-                        log.verbose(
-                            f"There's no hashed image reference for \"{entry_name}\""
-                            f" in {config['ENV_FILE_NAME']} currently"
-                        )
-                    else:
-                        log.verbose(
-                            "The current hashed image reference for "
-                            f"\"{entry_name}\" is: {current_hash}")
-
-                    new_hash = self.resolver.resolve_image_version(env[key])
-
-                    if new_hash == current_hash:
-                        log(f"{entry_name}: {env[key]} stays at {current_hash}")
-                    else:
-                        env[
-                            "_".join(["SERVICE", entry_name, "IMAGE", "HASHED"])
-                        ] = new_hash
-                        log(
-                            f"{colors.Green}{entry_name}: {env[key]} is "
-                            f"now at {new_hash}{colors.Reset}"
-                        )
 
         if not env.has_changes():
             log(f"No changes for \"{svc_name}\", done.")
