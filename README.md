@@ -25,7 +25,7 @@ To work, cipug expects a folder structure similar to this (the .snapshots locati
     + html-data           <- bind-mounted data that gets snapshotted too
     + sql-data            <- <same as html-data>
   + paperless-ngx
-    + ... 
+    + ...
   + ...
 ```
 
@@ -59,8 +59,9 @@ $ CIPUG_CONFIG_FILE=/path/to/cipug-config.json /path/to/cipug.py
 
 Name | Purpose | Values | Default
 ---|---|---|---
-`CIPUG_CONFIG_FILE` | [Optional] Specify a json file where the remaining settings should be read from | some path | *unset*
-`CIPUG_SERVICES_ROOT` | Folder where subvolumes with each a service in them reside | some absolute path | *unset*
+`CIPUG_CONFIG_FILE` | [Optional] Specify a json file where the remaining settings should be read from | Some path | *unset*
+`CIPUG_SERVICES_ROOT` | Folder where subvolumes with each a service in them reside | Some absolute path | *unset*
+`CIPUG_SERVICES_FILTER` | Only work on a subset of the services | Comma-separated list of service names that shall be considered | *unset*
 `CIPUG_COMPOSE_FILE_NAME` | What compose file to look out for at each service | Just the filename. This means all services need to have the same compose-file filename! | `compose.yml`
 `CIPUG_ENV_FILE_NAME` | What environment file to look out for at each service | Just the filename. This means all services need to have the same environment-file filename! | `.env`
 `CIPUG_COMPOSE_TOOL` | Used to stop (`down`) and start (`up -d`) services | `podman-compose`, `docker-compose`, `docker compose` or any other such tool| `podman-compose`
@@ -70,7 +71,4 @@ Name | Purpose | Values | Default
 `CIPUG_PRUNE_IMAGES` | Whether to prune images | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
 `CIPUG_VERBOSITY` | Sets exhaustiveness of logs | `0` = just errors, `1` = normal, `2` = verbose, `3` = highly verbose | `1`
 `CIPUG_CACHE_DURATION` | cipug caches image-tag resolutions to not exhaust docker-hub's rate limit so quickly | integer amount of seconds | `3600` (1h)
-`CIPUG_CACHE_LOCATION` | location where to store the cache in the form of a json file | some path | `<tmp-directory>/cipug_cache.json` 
-
-
-
+`CIPUG_CACHE_LOCATION` | location where to store the cache in the form of a json file | some path | `<tmp-directory>/cipug_cache.json`
