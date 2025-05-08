@@ -489,9 +489,27 @@ class Updater():
         for key in list(env.keys()):
             if key.startswith("SERVICE_") and key.endswith("_IMAGE_TAGGED"):
                 entry_name = key.removeprefix("SERVICE_").removesuffix("_IMAGE_TAGGED")
+                image_tagged = env[key]
+
+                # Check for environment variables in the tagged image (${VAR} format)
+                import re
+                def replace_env_vars(s: str, vars: dict[str, str]):
+                    def replace_var(match: re.Match):
+                        var_name = match.group(1)
+                        return vars.get(var_name, match.group(0))
+
+                    pattern = r'\${([A-Za-z0-9_]+)}'
+                    return re.sub(pattern, replace_var, s)
+
+                # Apply environment variable substitution
+                interpolated_image = replace_env_vars(image_tagged, env)
+                if interpolated_image != image_tagged:
+                    log.verbose(f"Interpolated image name: {image_tagged} → {interpolated_image}")
+                    image_tagged = interpolated_image
+
                 log.verbose(
                     f"Found tagged image entry for \"{entry_name}\": "
-                    f"{env[key]}"
+                    f"{image_tagged}"
                 )
 
                 current_hash = env.get(
@@ -508,16 +526,16 @@ class Updater():
                         "The current hashed image reference for "
                         f"\"{entry_name}\" is: {current_hash}")
 
-                new_hash = self.resolver.resolve_image_version(env[key])
+                new_hash = self.resolver.resolve_image_version(image_tagged)
 
                 if new_hash == current_hash:
-                    log(f"{entry_name}: {env[key]} stays at {current_hash}")
+                    log(f"{entry_name}: {image_tagged} stays at {current_hash}")
                 else:
                     env[
                         "_".join(["SERVICE", entry_name, "IMAGE", "HASHED"])
                     ] = new_hash
                     log(
-                        f"{colors.Green}{entry_name}: {env[key]} is "
+                        f"{colors.Green}{entry_name}: {image_tagged} is "
                         f"now at {new_hash}{colors.Reset}"
                     )
 
