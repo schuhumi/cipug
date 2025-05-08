@@ -120,6 +120,19 @@ class Config(dict):
                     "Valid values: true/false, 0/1, yes/no (not case sensitive)"
                 )
 
+        class Literally:
+            def __init__(self, valid_values: list):
+                self._valid_values = valid_values
+
+            def __call__(self, val):
+                if val not in self._valid_values:
+                    log.error(
+                        f"Invalid value {repr(val)}, valid options are: {self._valid_values}",
+                        exit_code = 5
+                    )
+                return val
+
+
         unset = object()  # Flag that there is no default -> variable is required
         settings_schema = {
             "VERBOSITY": (1, int),
@@ -128,6 +141,7 @@ class Config(dict):
             "COMPOSE_TOOL": ("podman-compose", str),
             "CONTAINER_TOOL": ("podman", str),
             "SERVICE_STOP_START": ("true", Str2Bool),
+            "STOP_START_METHOD": ("compose", Literally(["compose", "systemd-system", "systemd-user"])),
             "SERVICE_SNAPSHOT": ("true", Str2Bool),
             "SERVICE_PULL": ("true", Str2Bool),
             "PRUNE_IMAGES": ("true", Str2Bool),
@@ -358,7 +372,7 @@ class Image_Version_Resolver():
 
         # If there's no cache entry, or it is incomplete, or too old:
         info = json.loads(
-            subprocess.check_output(["skopeo", "inspect", "docker://"+name])
+            subprocess.check_output(["skopeo", "inspect", "--no-tags", "docker://"+name])
         )
         result = f'{info["Name"]}@{info["Digest"]}'
 
@@ -596,29 +610,47 @@ class Updater():
                 return
 
         if config["SERVICE_STOP_START"]:
-            log(f"stopping service \"{svc_name}\"..")
-            ret = subprocess.run(
-                config["COMPOSE_TOOL"].split(" ") + ["down"],
-                cwd=folder
-            ).returncode
-            if ret != 0:
-                log.error(
-                    f"Cannot update service \"{svc_name}\", because "
-                    f"stopping it failed (returncode {ret})"
-                )
-                return
+            if config["STOP_START_METHOD"] == "compose":
+                log(f"stopping service \"{svc_name}\"..")
+                ret = subprocess.run(
+                    config["COMPOSE_TOOL"].split(" ") + ["down"],
+                    cwd=folder
+                ).returncode
+                if ret != 0:
+                    log.error(
+                        f"Failed to stop service \"{svc_name}\" (returncode {ret})"
+                    )
+                    return
 
-        if config["SERVICE_STOP_START"]:
-            log(f"Starting \"{svc_name}\" service..")
-            ret = subprocess.run(
-                config["COMPOSE_TOOL"].split(" ") + ["up", "-d"],
-                cwd=folder
-            ).returncode
-            if ret != 0:
-                log.error(
-                    f"Failed to start service \"{svc_name}\" (returncode {ret})"
+                log(f"Starting \"{svc_name}\" service..")
+                ret = subprocess.run(
+                    config["COMPOSE_TOOL"].split(" ") + ["up", "-d"],
+                    cwd=folder
+                ).returncode
+                if ret != 0:
+                    log.error(
+                        f"Failed to start service \"{svc_name}\" (returncode {ret})"
+                    )
+                    return
+            elif config["STOP_START_METHOD"] in ["systemd-system", "systemd-user"]:
+                systemd_service = f"{config['COMPOSE_TOOL']}@{svc_name}"
+                log(
+                    f"Restarting {config['STOP_START_METHOD'].replace('-',' ')} service {systemd_service}"
                 )
-                return
+                cmdlist = ["systemctl"]
+                if "-user" in config["STOP_START_METHOD"]:
+                    cmdlist.append("--user")
+                cmdlist += ["restart", systemd_service]
+                ret = subprocess.run(cmdlist, cwd=folder).returncode
+                if ret != 0:
+                    log.error(
+                        f"Failed to restart service \"{svc_name}\" (returncode {ret})"
+                    )
+                    return
+            else:
+                log.error(
+                    f"Failed to restart service \"{svc_name}\". Unknown method '{config['STOP_START_METHOD']}'"
+                )
 
     def update_all_services(self):
         for svc in self.services:
