@@ -51,7 +51,7 @@ Due to questionable decisions by its developer, cipug has no support for command
 ```
 You can then run cipug like this:
 ```
-$ CIPUG_CONFIG_FILE=/path/to/cipug-config.json /path/to/cipug.py
+$ CIPUG_CONFIG_FILE=/path/to/cipug-config.json /path/to/cipug.sh
 ```
 
 
