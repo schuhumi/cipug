@@ -39,10 +39,14 @@ Besides from doing a snapshot and restarting the service, the big appeal with th
 
 You need to have skopeo, snapper and docker-compose or podman-compose installed. You need to organize your services in the way that is described in the "How it works" section. And you need Python >= 3.10 to run cipug.py, but no virtual environment with additional dependencies. It all works with what is included in Python :)
 
+## Modes of Operation
+
+ - `cipug.sh --update` or without arguments: perform updates as described above
+ - `cipug.sh --check-snapshots`: check for existence of recent snapshots. Currently cipug supports snapper snapshots and [btrbk](https://github.com/digint/btrbk) snapshots. Their location relative to each service subvolume as well as their maximum allowed age can be configured with the variables below.
 
 ## Configuration
 
-Due to questionable decisions by its developer, cipug has no support for command line arguments. It is controlled by environment variables and optionally a config file. If you need just one set of configuration and do not want to prepend the command with it, you can put that in a global environment variable config file like `/etc/environment` and reboot. If you want to have specific configuration files, you can populate an arbitrary json-file with a list of similar key-value pairs, and pass that using the `CIPUG_CONFIG_FILE` environment variable. You need to omit the `CIPUG_` prefix, hence the configuration file could look like this for example:
+Due to questionable decisions by its developer, cipug is not being configured by command line arguments. It is controlled by environment variables and optionally a config file. If you need just one set of configuration and do not want to prepend the command with it, you can put that in a global environment variable config file like `/etc/environment` and reboot. If you want to have specific configuration files, you can populate an arbitrary json-file with a list of similar key-value pairs, and pass that using the `CIPUG_CONFIG_FILE` environment variable. You need to omit the `CIPUG_` prefix, hence the configuration file could look like this for example:
 ```json
 {
     "SERVICES_ROOT": "/path/to/some/folder",
@@ -54,14 +58,14 @@ You can then run cipug like this:
 $ CIPUG_CONFIG_FILE=/path/to/cipug-config.json /path/to/cipug.sh
 ```
 
-
-## Environment Variables
+## Configuration Variables
 
 Name | Purpose | Values | Default
 ---|---|---|---
 `CIPUG_CONFIG_FILE` | [Optional] Specify a json file where the remaining settings should be read from | Some path | *unset*
 `CIPUG_SERVICES_ROOT` | Folder where subvolumes with each a service in them reside | Some absolute path | *unset*
 `CIPUG_SERVICES_FILTER` | Only work on a subset of the services | Comma-separated list of service names that shall be considered | *unset*
+`CIPUG_SERVICES_FILTER_EXCLUDE` | Only work on a subset of the services | Comma-separated list of service names that shall be ignored | *unset*
 `CIPUG_COMPOSE_FILE_NAME` | What compose file to look out for at each service | Just the filename. This means all services need to have the same compose-file filename! | `compose.yml`
 `CIPUG_ENV_FILE_NAME` | What environment file to look out for at each service | Just the filename. This means all services need to have the same environment-file filename! | `.env`
 `CIPUG_COMPOSE_TOOL` | Used to stop (`down`) and start (`up -d`) services | `podman-compose`, `docker-compose`, `docker compose` or any other such tool| `podman-compose`
@@ -73,3 +77,5 @@ Name | Purpose | Values | Default
 `CIPUG_VERBOSITY` | Sets exhaustiveness of logs | `0` = just errors, `1` = normal, `2` = verbose, `3` = highly verbose | `1`
 `CIPUG_CACHE_DURATION` | cipug caches image-tag resolutions to not exhaust docker-hub's rate limit so quickly | integer amount of seconds | `3600` (1h)
 `CIPUG_CACHE_LOCATION` | location where to store the cache in the form of a json file | some path | `<tmp-directory>/cipug_cache.json`
+`CIPUG_SNAPSHOTS_DIR_SNAPPER` and `CIPUG_SNAPSHOTS_DIR_BTRBK` | location of the respective snapshots | path relative to each service | *unset*
+`CIPUG_SNAPSHOTS_MAX_AGE_SNAPPER` and `CIPUG_SNAPSHOTS_MAX_AGE_BTRBK` | maximum allowed age of snapshots | hours (integer or floating point) | `1.5` and `36`

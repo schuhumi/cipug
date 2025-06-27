@@ -2,6 +2,7 @@ import sys
 from typing import NoReturn, overload
 
 from .colors import colors
+from .exit_code import Exit_Code, MULTIPLE_ERRORS
 
 class log():
     """Simple logging functionality, use:
@@ -25,14 +26,24 @@ class log():
 
     @classmethod
     @overload
-    def error(cls, msg: str, exit_code: int) -> NoReturn:
+    def error(cls, msg: str, exit_code: Exit_Code | list[Exit_Code]) -> NoReturn:
         ...
 
     @classmethod
-    def error(cls, msg: str, exit_code: int = 0) -> NoReturn | None:
+    def error(cls, msg: str, exit_code: Exit_Code | list[Exit_Code] |  None = None) -> NoReturn | None:
+        if isinstance(exit_code, Exit_Code):
+            msg = f"[{exit_code.code}={exit_code.name}] " + msg
+        elif isinstance(exit_code, list):
+            msg = "[" + ",".join(f"{e.code}={e.name}" for e in exit_code) + "] " + msg
+
         print(f"{colors.Bold}{colors.Red}{msg}{colors.Reset}", file=sys.stderr)
-        if exit_code:
-            sys.exit(exit_code)
+        if exit_code is not None:
+            if isinstance(exit_code, list):
+                if len(set(exit_code)) == 1:
+                    sys.exit(exit_code.pop().code)
+                else:
+                    sys.exit(MULTIPLE_ERRORS.code)
+            sys.exit(exit_code.code)
 
     @classmethod
     def verbose(cls, msg: str):

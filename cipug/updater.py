@@ -1,67 +1,27 @@
-import os
-import glob
 from pathlib import Path
 from datetime import datetime
 import subprocess
 
 from .colors import colors
+from .config import Config
 from .log import log
 from .env import Env
 from .resolver import Image_Version_Resolver
 from .snapper import Snapper
+from .utils import get_services
+from . import exit_code
 
 class Updater():
     def __init__(
         self,
-        config: dict,
+        config: Config,
         resolver: Image_Version_Resolver,
         snapper: Snapper
     ):
         self.config = config
         self.resolver = resolver
         self.snapper = snapper
-
-        if not self.config["SERVICES_ROOT"].is_dir():
-            log.error(
-                f"CIPUG_SERVICES_ROOT set to {self.config['SERVICES_ROOT']}"
-                ", but is not a directory!",
-                exit_code=2
-            )
-
-        pattern = os.path.join("*", config["COMPOSE_FILE_NAME"])
-        log.vverbose(
-            f"Searching for pattern \"{pattern}\" at {self.config['SERVICES_ROOT']}"
-        )
-
-        self.services: list[Path] = []  # list of folders with a compose and env file
-        for result in glob.glob(
-            pattern,
-            root_dir=self.config["SERVICES_ROOT"]
-        ):
-            compose_file = self.config["SERVICES_ROOT"] / result
-            env_file = compose_file.parent / self.config["ENV_FILE_NAME"]
-            if not env_file.is_file():
-                log.verbose(
-                    f"Found {compose_file} but no {env_file}, skipping this folder"
-                )
-                continue
-            self.services.append(compose_file.parent)
-
-        if self.config["SERVICES_FILTER"] != "":
-            filter = self.config["SERVICES_FILTER"].split(",")
-            log.verbose(f"Filtering services to be one of {filter}")
-            self.services = [
-                entry for entry in self.services if entry.stem in filter
-            ]
-
-        if len(self.services)==1:
-            log.verbose("Found one service:")
-        elif len(self.services)>1:
-            log.verbose(f"Found {len(self.services)} services:")
-        else:
-            log.verbose("Did not find any services.")
-        for svc in self.services:
-            log.verbose(f" - {svc}")
+        self.services = get_services(self.config)
 
     def _update_image_hashes(self, env: Env):
         for key in list(env.keys()): # Dict size will change, hence copy env.keys into a list
@@ -223,14 +183,14 @@ class Updater():
         return True
 
 
-    def update_service(self, folder: Path):
+    def update_service(self, folder: Path) -> exit_code.Exit_Code | None:
         svc_name = folder.stem  # Only the folder name itself, not the whole path
         log(f"Working on service \"{svc_name}\"", highlight=True)
 
         env_file = folder / self.config["ENV_FILE_NAME"]
         if not env_file.is_file():
             log.error(f"File {env_file} not found, cannot update service.")
-            return
+            return exit_code.FILE_NOT_FOUND
         env = Env(env_file)
 
         log.vverbose(
@@ -247,20 +207,24 @@ class Updater():
             return
 
         if not self._check_permission_compose_tool(folder, svc_name):
-            return
+            return exit_code.TOOL_ERROR
 
         if not self._cater_for_snapshot(folder, svc_name):
-            return
+            return exit_code.SNAPSHOT_ERROR
 
         if not self._cater_for_updating_env_file(env, svc_name):
-            return
+            return exit_code.ENV_ERROR
 
         if not self._cater_for_image_pull(folder, svc_name):
-            return
+            return exit_code.IMAGE_PULL_ERROR
 
         if not self._cater_for_restart(folder, svc_name):
-            return
+            return exit_code.SERVICE_RESTART_ERROR
 
-    def update_all_services(self):
+    def update_all_services(self) -> list[exit_code.Exit_Code]:
+        errors: list[exit_code.Exit_Code] = []
         for svc in self.services:
-            self.update_service(svc)
+            e = self.update_service(svc)
+            if e is not None:
+                errors.append(e)
+        return errors

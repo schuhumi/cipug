@@ -4,6 +4,7 @@ import os
 import json
 
 from .log import log
+from . import exit_code
 
 unset = object()  # Flag that there is no default -> variable is required
 
@@ -31,7 +32,7 @@ class Literally:
         if val not in self._valid_values:
             log.error(
                 f"Invalid value {repr(val)}, valid options are: {self._valid_values}",
-                exit_code = 5
+                exit_code = exit_code.VALUE_ERROR
             )
         return val
 
@@ -43,6 +44,7 @@ class Config(dict):
         "VERBOSITY": (1, int),
         "SERVICES_ROOT": (unset, Path),
         "SERVICES_FILTER": ("", str),
+        "SERVICES_FILTER_EXCLUDE": ("", str),
         "COMPOSE_TOOL": ("podman-compose", str),
         "CONTAINER_TOOL": ("podman", str),
         "SERVICE_STOP_START": ("true", Str2Bool),
@@ -54,6 +56,10 @@ class Config(dict):
         "ENV_FILE_NAME": (".env", str),
         "CACHE_DURATION": (60*60, int),
         "CACHE_LOCATION": (Path(gettempdir()) / "cipug_cache.json", Path),
+        "SNAPSHOTS_DIR_SNAPPER": ("", str),
+        "SNAPSHOTS_MAX_AGE_SNAPPER": (1.5, float),
+        "SNAPSHOTS_DIR_BTRBK": ("", str),
+        "SNAPSHOTS_MAX_AGE_BTRBK": (36, float),
         "CONFIG_FILE": ("", str)
     }
 
@@ -61,26 +67,26 @@ class Config(dict):
         if self["CONFIG_FILE"] != "":
             config_path = Path(self["CONFIG_FILE"])
             if not config_path.is_file():
-                log.error(f"Could not find config file {config_path}", exit_code=5)
+                log.error(f"Could not find config file {config_path}", exit_code=exit_code.FILE_NOT_FOUND)
             try:
                 config_from_file = json.loads(config_path.read_text())
             except Exception as e:
                 log.error(
                     f"Could not read config file {config_path}: {e}",
-                    exit_code=5
+                    exit_code=exit_code.UNKNOWN_FILE_FORMAT
                 )
             if not isinstance(config_from_file, dict):
                 log.error(
                     f"Reading json config file {config_path} did not yield a dict, "
                     "but it must be a dict of setting-name and setting-value pairs",
-                    exit_code=5
+                    exit_code=exit_code.UNKOWN_DATA_STRUCTURE
                 )
             for name, value in config_from_file.items():
                 if name not in self.settings_schema:
                     log.error(
                         f"Unkown setting {name} in config file {config_path}. "
                         f"Known settings: {', '.join(self.settings_schema.keys())}",
-                        exit_code=5
+                        exit_code=exit_code.VALUE_ERROR
                     )
                 cast_to = self.settings_schema[name][1]
                 try:
@@ -90,7 +96,7 @@ class Config(dict):
                         f"Could not interpret config settings {name}, "
                         f"which is supposed to be of type {cast_to} "
                         f"and set to \"{value}\": {e}",
-                        exit_code=4
+                        exit_code=exit_code.TYPE_ERROR
                     )
                 self[name] = casted_value
 
@@ -108,7 +114,7 @@ class Config(dict):
                 log.error(
                     f"Could not interpret environment variable CIPUG_{name}, which "
                     f"is supposed to be of type {cast_to} and set to \"{value}\": {e}",
-                    exit_code=4
+                    exit_code=exit_code.TYPE_ERROR
                 )
             self[name] = casted_value
 
@@ -122,7 +128,7 @@ class Config(dict):
                     f"Setting {name} is required but not set. Please set "
                     f"the CIPUG_{name} environment variable or the {name} "
                     f"setting in a json config file.",
-                    exit_code=1
+                    exit_code=exit_code.VALUE_ERROR
                 )
 
         log.verbose(f"Loaded cipug config: \n{'-'*10}\n{self}\n{'-'*10}")
