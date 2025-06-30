@@ -22,6 +22,10 @@ class Env(dict):
                 line = line.rstrip("\n")
                 if key_to_append_next_line_to is None:
                     # There was no \ at the end of the previous line -> new entry
+                    if line.strip() == "":  # Ignore empty lines
+                        continue
+                    if line.strip().startswith("#"):  # Ignore comments
+                        continue
                     key, val = line.split("=", 1)
                     self[key] = val
                     if line[-1]=="\\":

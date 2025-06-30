@@ -80,12 +80,14 @@ class Updater():
 
     def _check_permission_compose_tool(self, folder: Path, svc_name: str) -> bool:
         log(f"Ensuring permission for \"{self.config['COMPOSE_TOOL']}\"..")
-        ret = subprocess.run(
+        cp = subprocess.run(
             self.config["COMPOSE_TOOL"].split(" ") + ["ps"],
             cwd=folder,
             capture_output=True
-        ).returncode
+        )
+        ret = cp.returncode
         if ret != 0:
+            print(cp.stdout.decode(), cp.stderr.decode())
             log.error(
                 f"Cannot update service \"{svc_name}\", because "
                 f"cannot use \"{self.config['COMPOSE_TOOL']}\" (returncode {ret})"
