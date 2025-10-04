@@ -7,7 +7,7 @@ from .log import log
 from . import exit_code
 
 unset = object()  # Flag that there is no default -> variable is required
-
+not_supplied = object()  # Flag that a environment variable wasn't supplied
 
 class Str2Bool:
     """Utility to interpret environment strings a boolean config values"""
@@ -66,6 +66,7 @@ class Config(dict):
     def _load_config_file(self):
         if self["CONFIG_FILE"] != "":
             config_path = Path(self["CONFIG_FILE"])
+            log.verbose(f"Loading config file: {config_path.resolve()}")
             if not config_path.is_file():
                 log.error(f"Could not find config file {config_path}", exit_code=exit_code.FILE_NOT_FOUND)
             try:
@@ -82,6 +83,11 @@ class Config(dict):
                     exit_code=exit_code.UNKOWN_DATA_STRUCTURE
                 )
             for name, value in config_from_file.items():
+                if name == "CONFIG_FILE":
+                    log.error(
+                        "Specifying the config file path inside the config file doesn't make sense.",
+                        exit_code=exit_code.VALUE_ERROR
+                    )
                 if name not in self.settings_schema:
                     log.error(
                         f"Unkown setting {name} in config file {config_path}. "
@@ -101,11 +107,22 @@ class Config(dict):
                 self[name] = casted_value
 
     def __init__(self):
-        for name, (default, cast_to) in self.settings_schema.items():
-            value = os.environ.get("CIPUG_"+name, default)
-            if value is unset:
-                # maybe we will get it later in a config file
-                self[name] = unset
+
+        # Handle config file first by making sure we parse the corresponding environment variable setting first,
+        # and then load the config file. All other environment variables are handled after, and therefore overwrite
+        # the settings from the config file.
+        names = ["CONFIG_FILE"] + [
+            key for key in self.settings_schema.keys()
+            if key != "CONFIG_FILE"
+        ]
+
+
+        for name in names:
+            default, cast_to = self.settings_schema[name]
+            value = os.environ.get("CIPUG_"+name, not_supplied)
+            if value is not_supplied:
+                if name not in self.keys():  # Not yet set by config file -> default
+                    self[name] = default
                 continue
 
             try:
@@ -117,6 +134,8 @@ class Config(dict):
                     exit_code=exit_code.TYPE_ERROR
                 )
             self[name] = casted_value
+            if name == "CONFIG_FILE":
+                self._load_config_file()
 
         # Special handling for verbosity: configure the logging
         log.verbosity = self["VERBOSITY"]
@@ -135,5 +154,5 @@ class Config(dict):
 
     def __str__(self):
         return "\n".join([
-            f"CIPUG_{key}={val}" for key, val in self.items()
+            f"{key}={val}" for key, val in self.items()
         ])

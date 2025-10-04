@@ -57,6 +57,7 @@ You can then run cipug like this:
 ```
 $ CIPUG_CONFIG_FILE=/path/to/cipug-config.json /path/to/cipug.sh
 ```
+When config values are present in both a config file and as environment variable, the environment variable has precedence.
 
 ## Configuration Variables
 

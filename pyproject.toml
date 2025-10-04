@@ -1,0 +1,28 @@
+[build-system]
+requires = ["uv_build >= 0.8.17, <0.9.0"]
+build-backend = "uv_build"
+
+[project]
+name = "cipug"
+description = "Container Images Pinning and Updating Gadget"
+readme = "README.md"
+authors = [
+  {name = "Simon Schumann", email = "simon.schumann@web.de"},
+]
+license = "GPL-3.0-or-later"
+version = "0.0.1"
+requires-python = ">= 3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+Repository = "https://github.com/schuhumi/cipug.git"
+
+[project.scripts]
+cipug = "cipug:main"
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "cipug"

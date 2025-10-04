@@ -17,6 +17,23 @@ from . import exit_code
 
 def main():
     config = Config()
+
+    if "--print-config" in sys.argv:
+        print(config)
+        return
+
+    if "--print-config-json" in sys.argv:
+        import json
+        from pathlib import Path
+        class PosixPathEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, Path):
+                    return str(obj.resolve())
+                return super().default(obj)
+
+        json.dump(config, sys.stdout, indent=4, cls=PosixPathEncoder)
+        return
+
     check_dependencies(config)
 
     if "--check-snapshots" in sys.argv:
