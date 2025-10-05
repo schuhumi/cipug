@@ -7,9 +7,9 @@ from .utils import get_services
 from .colors import colors
 
 class Snapshot_Checker:
-    def __init__(self, config: Config):
-        self.config = config
-        self.services: list[Path] = get_services(config)
+    def __init__(self):
+        self.config = Config()
+        self.services: list[Path] = get_services()
 
     def _last_snapshot_date_snapper(self, svc: Path) -> datetime | None:
         subdir = self.config["SNAPSHOTS_DIR_SNAPPER"]

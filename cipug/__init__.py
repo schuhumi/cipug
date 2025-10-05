@@ -34,10 +34,10 @@ def main():
         json.dump(config, sys.stdout, indent=4, cls=PosixPathEncoder)
         return
 
-    check_dependencies(config)
+    check_dependencies()
 
     if "--check-snapshots" in sys.argv:
-        checker = Snapshot_Checker(config)
+        checker = Snapshot_Checker()
         if checker.check():
             log("All required snapshots were found.")
         else:
@@ -45,10 +45,10 @@ def main():
 
     if (len(sys.argv) == 1) or ("--update" in sys.argv):
         # No arguments, default update behavior
-        prune_images(config)
-        resolver = Image_Version_Resolver(config)
+        prune_images()
+        resolver = Image_Version_Resolver()
         snapper = Snapper()
-        updater = Updater(config=config, resolver=resolver, snapper=snapper)
+        updater = Updater(resolver=resolver, snapper=snapper)
         errors = updater.update_all_services()
         if errors:
             log.error("Encountered errors during updating!", exit_code=errors)

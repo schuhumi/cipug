@@ -10,10 +10,8 @@ class Image_Version_Resolver():
     hashed tag. It also caches results to not hit docker-hubs restrictive
     rate limit so quickly."""
 
-    def __init__(
-        self,
-        config: Config
-    ):
+    def __init__(self):
+        config = Config()
         self.cache_file = config["CACHE_LOCATION"]
         self.cache_duration = config["CACHE_DURATION"]
         self.cache = {}
