@@ -14,14 +14,13 @@ from . import exit_code
 class Updater():
     def __init__(
         self,
-        config: Config,
         resolver: Image_Version_Resolver,
         snapper: Snapper
     ):
-        self.config = config
+        self.config = Config()
         self.resolver = resolver
         self.snapper = snapper
-        self.services = get_services(self.config)
+        self.services = get_services()
 
     def _update_image_hashes(self, env: Env):
         for key in list(env.keys()): # Dict size will change, hence copy env.keys into a list

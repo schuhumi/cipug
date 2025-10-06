@@ -40,6 +40,7 @@ class Literally:
 class Config(dict):
     """Get config for cipug from environment variables. This has
     nothing to do with the .env file for compose."""
+    _instance = None
     settings_schema = {
         "VERBOSITY": (1, int),
         "SERVICES_ROOT": (unset, Path),
@@ -62,6 +63,12 @@ class Config(dict):
         "SNAPSHOTS_MAX_AGE_BTRBK": (36, float),
         "CONFIG_FILE": ("", str)
     }
+    
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(Config, cls).__new__(cls)
+            super(Config, cls._instance).__init__(*args, **kwargs)
+        return cls._instance
 
     def _load_config_file(self):
         if self["CONFIG_FILE"] != "":

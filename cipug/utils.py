@@ -8,7 +8,8 @@ from .config import Config
 from . import exit_code
 
 
-def get_services(config: Config) -> list[Path]:
+def get_services() -> list[Path]:
+    config = Config()
     if not config["SERVICES_ROOT"].is_dir():
         log.error(
             f"CIPUG_SERVICES_ROOT set to {config['SERVICES_ROOT']}"
@@ -61,9 +62,9 @@ def get_services(config: Config) -> list[Path]:
 
 
 
-def check_dependencies(config: Config):
+def check_dependencies():
     """Check if the required utilities can be run"""
-
+    config = Config()
     tools = ["skopeo"]
 
     if config["SERVICE_STOP_START"]:
@@ -90,7 +91,8 @@ def check_dependencies(config: Config):
             log.error(f"Could not find tool \"{tool}\", cannot proceed.", exit_code=exit_code.SYSTEM_ERROR)
 
 
-def prune_images(config: Config):
+def prune_images():
+    config = Config()
     if config["PRUNE_IMAGES"]:
         log("Pruning images..")
         ret = subprocess.run(
