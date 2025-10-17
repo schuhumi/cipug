@@ -2,121 +2,130 @@ from tests.mock_tools.tools.base import MockTool, Action
 import json
 
 mock_data  = {
-    "docker://ghcr.io/immich-app/immich-server:v1.132.3": {
+    "docker://ghcr.io/immich-app/immich-server:release": {
         "Name": "ghcr.io/immich-app/immich-server",
-        "Digest": "sha256:6680d88486251b0264a78a1934fe82eef875555aa6d84d703a0980328a5d5c31",
+        "Digest": "sha256:72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210",
         "RepoTags": [],
-        "Created": "2025-04-28T15:19:02.536847314Z",
+        "Created": "2025-10-15T19:26:59.439284494Z",
         "DockerVersion": "",
         "Labels": {
-            "org.opencontainers.image.created": "2025-04-28T15:16:39.733Z",
+            "org.opencontainers.image.created": "2025-10-15T19:24:51.468Z",
             "org.opencontainers.image.description": "High performance self-hosted photo and video management solution.",
             "org.opencontainers.image.licenses": "AGPL-3.0",
-            "org.opencontainers.image.revision": "02994883fe3f3972323bb6759d0170a4062f5236",
+            "org.opencontainers.image.revision": "43eccca86a4b25deb132bda72ac4d846332f3e6d",
             "org.opencontainers.image.source": "https://github.com/immich-app/immich",
             "org.opencontainers.image.title": "immich",
             "org.opencontainers.image.url": "https://github.com/immich-app/immich",
-            "org.opencontainers.image.version": "v1.132.3"
+            "org.opencontainers.image.version": "v2.1.0"
         },
         "Architecture": "amd64",
         "Os": "linux",
         "Layers": [
-            "sha256:6e909acdb790c5a1989d9cfc795fda5a246ad6664bb27b5c688e2b734b2c5fad",
-            "sha256:d714f4673cad3750083007b710a3d74ea21d34db71daaa04e44bafafb9d58445",
-            "sha256:be84add755f800c3580c34f5f0e56856b96013886d9bfd3f08b0f0d957b77466",
-            "sha256:9a8d89ceeab1eb03867d4edc7c38bf07c9277acb361a5973c71c00fb4d222901",
-            "sha256:4c07c1809c8eebaab536b60272897848a5b72b4451b9e51bc7118d5aef302f75",
-            "sha256:4b9ddc9fcd99e9db347badc9c25637cee42a9eef55cd98dd9127ceabbb0083e6",
-            "sha256:8ccef78c3b11ec9325b13606a5eb1b02c25eef79418c3e6f771e0fcb78cbf6a9",
-            "sha256:d7eef232885e3d757ad716cd1c48a86500e57e1573a36fee0bc60583b283cc7c",
-            "sha256:b43bd143aa84d2c3ceca83a2bfb01805f98bf52d5838b3e9d17f7c15816d9197",
-            "sha256:56c104725db98ef1a869a4703676e4e5ce20af6f4f66c7ff2506a5899124f0ee",
-            "sha256:13004ec1a21ea8e0b0e9d11a16b1a4396841f08c4dc83ddadaf3faff2dffa8e7",
-            "sha256:2220cab64ee511e7429b273793e52c1e21d01b8028a05fc7652e5fbe4a2012d5",
+            "sha256:396b1da7636e2dcd10565cb4f2f952cbb4a8a38b58d3b86a2cacb172fb70117c",
+            "sha256:c06c7d5debd60ba5e039513fb405e868e4dea802634462b0e0e92c7667547a20",
+            "sha256:6b9d6ac9b0f9eb85f79b00eb45c2593d2a53d5cb55d4f37fe09ed6609f42c937",
+            "sha256:c3756cb0d50f63526a0e085ef730da1e7cd9f381e6ee141419dcbc936346903a",
+            "sha256:2a434cb0ef0e6270689f144b545cd93155837dab7170c00fa4633a171f4e1b1d",
+            "sha256:cf83e48f496ee602f3f411b7a03b918790be4f556b465577e344d6326b11afd8",
+            "sha256:fb3a52a86c51dccd98558d658433183ad4d51dc3469123efb1de689b3406a7d0",
+            "sha256:a87ef2944ae3e9314508270955be73149cb66621cf0b31029b7513901a8a9de5",
+            "sha256:3c6e0f822e983b4baacff85102caf060ac85c627177c747e6cd8ab873d0c14e6",
+            "sha256:9bb8f5fec87514c56cccd87cc4f8713003775636bce808cc10f708365eadb6b1",
+            "sha256:7b569af334bc657887f878a25e3e11496c5ada20cd4b565b93f74646d2d1b19d",
+            "sha256:1a15eda7ef2d5dcc57e2008a3b7d149a418d3bc0a517cace1ffde2904b173b9f",
+            "sha256:cd610e300ec4ad7011a09be433784a62a119fce18f4e4367a8663df6a028557e",
+            "sha256:ed7feaecc61735da016b9b6af4c162d81c0f1f40dd9ba059f34f5662afb7130f",
             "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
-            "sha256:3f8be4c489f5f5f1e201a82e66db04d5dae3041c12227bd503c5dadb013d7c99",
-            "sha256:eb98cc321ff0c685e1a8062ecbcd04be27474eef1b1c3c7193cb4a3e32f2f1fb",
-            "sha256:96f756e9c69d48f87d21162a0801eb70bbbf9577a00d0482f2c261ccbf0528ab",
-            "sha256:22014be2f2d658af3036a345ff26cc65506c45e431cfc32d7fa6d8c0aef49007",
-            "sha256:238e9536a299e4c7052fd63791600eab2d63ad376d66d15d6b9855a3a4e2084a",
-            "sha256:ea667375bd871346e26733c4b5d1438cd8249c8b85bdd443961d8bf5fd92afc3",
-            "sha256:66801314ef77cbe2c26b04d2ea1e2171dff2691380dae91a619b11a5236da236",
-            "sha256:db50dc8e4251d4f730c716561b0675451dbefebbd04255d68230711031b61458",
-            "sha256:29338c290ecd511ebf187eda21bf7a9c1747b31ebebadb3755e60e6ea0611902",
-            "sha256:672a94486b6da8572fb2d20b18fcdd688546b663d6417fb309e23320213d199a",
-            "sha256:002db8e47c9205492274e9bb45277fe25c53034eb643188d1cc50a7ede449c82"
+            "sha256:c73f3882885da7bff5c4e940f0bec564f67da0e1ea42d3ea2ab104cb533a1602",
+            "sha256:756f8b6f7b4ce3a10fc8c9aabaafd44b83c5467eb66261c16f02da2a72b4fa41",
+            "sha256:19d98c34a704508fd72b38e01edae7aff801f5b84ea821ab89cfe9418522818a",
+            "sha256:081e96395164ba53e52b927ac72a42efb11cbe6c86b437c4e5f1e06784136e09",
+            "sha256:3f6e24ea430f27266d9c49096f29a3a298d51242b1174705725d4afd1fcc76c9",
+            "sha256:e7f5b8f417d430572d85616b4bac45d574e50ef7e64661b43c67343925736d48"
         ],
         "LayersData": [
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:6e909acdb790c5a1989d9cfc795fda5a246ad6664bb27b5c688e2b734b2c5fad",
-                "Size": 28204865,
+                "Digest": "sha256:396b1da7636e2dcd10565cb4f2f952cbb4a8a38b58d3b86a2cacb172fb70117c",
+                "Size": 29773285,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:d714f4673cad3750083007b710a3d74ea21d34db71daaa04e44bafafb9d58445",
-                "Size": 3313,
+                "Digest": "sha256:c06c7d5debd60ba5e039513fb405e868e4dea802634462b0e0e92c7667547a20",
+                "Size": 3309,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:be84add755f800c3580c34f5f0e56856b96013886d9bfd3f08b0f0d957b77466",
-                "Size": 48314646,
+                "Digest": "sha256:6b9d6ac9b0f9eb85f79b00eb45c2593d2a53d5cb55d4f37fe09ed6609f42c937",
+                "Size": 49006197,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:9a8d89ceeab1eb03867d4edc7c38bf07c9277acb361a5973c71c00fb4d222901",
-                "Size": 1712503,
+                "Digest": "sha256:c3756cb0d50f63526a0e085ef730da1e7cd9f381e6ee141419dcbc936346903a",
+                "Size": 1717141,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:4c07c1809c8eebaab536b60272897848a5b72b4451b9e51bc7118d5aef302f75",
-                "Size": 448,
+                "Digest": "sha256:2a434cb0ef0e6270689f144b545cd93155837dab7170c00fa4633a171f4e1b1d",
+                "Size": 449,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:4b9ddc9fcd99e9db347badc9c25637cee42a9eef55cd98dd9127ceabbb0083e6",
+                "Digest": "sha256:cf83e48f496ee602f3f411b7a03b918790be4f556b465577e344d6326b11afd8",
                 "Size": 95,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:8ccef78c3b11ec9325b13606a5eb1b02c25eef79418c3e6f771e0fcb78cbf6a9",
-                "Size": 1323,
+                "Digest": "sha256:fb3a52a86c51dccd98558d658433183ad4d51dc3469123efb1de689b3406a7d0",
+                "Size": 1113,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:d7eef232885e3d757ad716cd1c48a86500e57e1573a36fee0bc60583b283cc7c",
-                "Size": 382083236,
+                "Digest": "sha256:a87ef2944ae3e9314508270955be73149cb66621cf0b31029b7513901a8a9de5",
+                "Size": 39521631,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:b43bd143aa84d2c3ceca83a2bfb01805f98bf52d5838b3e9d17f7c15816d9197",
-                "Size": 39868218,
+                "Digest": "sha256:3c6e0f822e983b4baacff85102caf060ac85c627177c747e6cd8ab873d0c14e6",
+                "Size": 3795,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:56c104725db98ef1a869a4703676e4e5ce20af6f4f66c7ff2506a5899124f0ee",
-                "Size": 17669160,
+                "Digest": "sha256:9bb8f5fec87514c56cccd87cc4f8713003775636bce808cc10f708365eadb6b1",
+                "Size": 330988706,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:13004ec1a21ea8e0b0e9d11a16b1a4396841f08c4dc83ddadaf3faff2dffa8e7",
+                "Digest": "sha256:7b569af334bc657887f878a25e3e11496c5ada20cd4b565b93f74646d2d1b19d",
+                "Size": 39975238,
+                "Annotations": None
+            },
+            {
+                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+                "Digest": "sha256:1a15eda7ef2d5dcc57e2008a3b7d149a418d3bc0a517cace1ffde2904b173b9f",
+                "Size": 18082081,
+                "Annotations": None
+            },
+            {
+                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
+                "Digest": "sha256:cd610e300ec4ad7011a09be433784a62a119fce18f4e4367a8663df6a028557e",
                 "Size": 132,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:2220cab64ee511e7429b273793e52c1e21d01b8028a05fc7652e5fbe4a2012d5",
-                "Size": 7871,
+                "Digest": "sha256:ed7feaecc61735da016b9b6af4c162d81c0f1f40dd9ba059f34f5662afb7130f",
+                "Size": 7518,
                 "Annotations": None
             },
             {
@@ -127,88 +136,59 @@ mock_data  = {
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:3f8be4c489f5f5f1e201a82e66db04d5dae3041c12227bd503c5dadb013d7c99",
-                "Size": 154002319,
+                "Digest": "sha256:c73f3882885da7bff5c4e940f0bec564f67da0e1ea42d3ea2ab104cb533a1602",
+                "Size": 102517452,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:eb98cc321ff0c685e1a8062ecbcd04be27474eef1b1c3c7193cb4a3e32f2f1fb",
-                "Size": 795455,
+                "Digest": "sha256:756f8b6f7b4ce3a10fc8c9aabaafd44b83c5467eb66261c16f02da2a72b4fa41",
+                "Size": 17245872,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:96f756e9c69d48f87d21162a0801eb70bbbf9577a00d0482f2c261ccbf0528ab",
-                "Size": 645,
+                "Digest": "sha256:19d98c34a704508fd72b38e01edae7aff801f5b84ea821ab89cfe9418522818a",
+                "Size": 754276,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:22014be2f2d658af3036a345ff26cc65506c45e431cfc32d7fa6d8c0aef49007",
-                "Size": 15459652,
+                "Digest": "sha256:081e96395164ba53e52b927ac72a42efb11cbe6c86b437c4e5f1e06784136e09",
+                "Size": 215,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:238e9536a299e4c7052fd63791600eab2d63ad376d66d15d6b9855a3a4e2084a",
-                "Size": 6500,
+                "Digest": "sha256:3f6e24ea430f27266d9c49096f29a3a298d51242b1174705725d4afd1fcc76c9",
+                "Size": 11148,
                 "Annotations": None
             },
             {
                 "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:ea667375bd871346e26733c4b5d1438cd8249c8b85bdd443961d8bf5fd92afc3",
-                "Size": 153318,
-                "Annotations": None
-            },
-            {
-                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:66801314ef77cbe2c26b04d2ea1e2171dff2691380dae91a619b11a5236da236",
-                "Size": 622,
-                "Annotations": None
-            },
-            {
-                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:db50dc8e4251d4f730c716561b0675451dbefebbd04255d68230711031b61458",
-                "Size": 614,
-                "Annotations": None
-            },
-            {
-                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:29338c290ecd511ebf187eda21bf7a9c1747b31ebebadb3755e60e6ea0611902",
-                "Size": 1061633,
-                "Annotations": None
-            },
-            {
-                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:672a94486b6da8572fb2d20b18fcdd688546b663d6417fb309e23320213d199a",
-                "Size": 11146,
-                "Annotations": None
-            },
-            {
-                "MIMEType": "application/vnd.oci.image.layer.v1.tar+gzip",
-                "Digest": "sha256:002db8e47c9205492274e9bb45277fe25c53034eb643188d1cc50a7ede449c82",
+                "Digest": "sha256:e7f5b8f417d430572d85616b4bac45d574e50ef7e64661b43c67343925736d48",
                 "Size": 11102,
                 "Annotations": None
             }
         ],
         "Env": [
-            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/src/app/bin",
-            "NODE_VERSION=22.14.0",
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/src/app/server/bin",
+            "NODE_VERSION=22.18.0",
             "YARN_VERSION=1.22.22",
+            "DEBIAN_RELEASE=trixie",
             "LD_LIBRARY_PATH=/usr/lib/jellyfin-ffmpeg/lib:/usr/lib/wsl/lib:",
             "NODE_ENV=production",
             "NVIDIA_DRIVER_CAPABILITIES=all",
             "NVIDIA_VISIBLE_DEVICES=all",
-            "IMMICH_BUILD=14709928600",
-            "IMMICH_BUILD_URL=https://github.com/immich-app/immich/actions/runs/14709928600",
-            "IMMICH_BUILD_IMAGE=v1.132.3",
+            "IMMICH_BUILD=18540213782",
+            "IMMICH_BUILD_URL=https://github.com/immich-app/immich/actions/runs/18540213782",
+            "IMMICH_BUILD_IMAGE=v2.1.0",
             "IMMICH_BUILD_IMAGE_URL=https://github.com/immich-app/immich/pkgs/container/immich-server",
             "IMMICH_REPOSITORY=immich-app/immich",
             "IMMICH_REPOSITORY_URL=https://github.com/immich-app/immich",
-            "IMMICH_SOURCE_REF=v1.132.3",
-            "IMMICH_SOURCE_COMMIT=02994883fe3f3972323bb6759d0170a4062f5236",
-            "IMMICH_SOURCE_URL=https://github.com/immich-app/immich/commit/02994883fe3f3972323bb6759d0170a4062f5236"
+            "IMMICH_SOURCE_REF=v2.1.0",
+            "IMMICH_SOURCE_COMMIT=43eccca86a4b25deb132bda72ac4d846332f3e6d",
+            "IMMICH_SOURCE_URL=https://github.com/immich-app/immich/commit/43eccca86a4b25deb132bda72ac4d846332f3e6d"
         ]
     }
 
@@ -220,6 +200,10 @@ class Skopeo(MockTool):
 
     def run(self, argv: list[str]) -> Action:
         match argv[1:]:
+            case ["--version"]:
+                return Action(
+                    stdout="skopeo version 1.20.0\n"
+                )
             case ["inspect", "--no-tags", image]:
                 if image not in mock_data:
                     return Action(

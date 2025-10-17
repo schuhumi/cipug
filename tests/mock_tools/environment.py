@@ -17,6 +17,10 @@ class LogEntry:
     argv: list[str]
     action: Action
 
+    @property
+    def cmdline(self) -> list[str]:
+        return [self.name] + self.argv[1:]
+
 
 class Environment:
     # Creates executables for the requested MockTools in a temporary directory, and bends
@@ -45,10 +49,19 @@ class Environment:
             self._install_tool(tool)
         self.env_overwrites_backup = {}
         for key, val in self.env_overwrites.items():
+            if (val is None) and (key not in os.environ):
+                # We want to make sure an environment variable is absent that is already absent
+                # -> do nothing
+                continue
             self.env_overwrites_backup[key] = os.environ.get(key, None)
-            val_str = str(val)
-            os.environ[key] = val_str
-            os.putenv(key, val_str)
+            if val is None:
+                if key in os.environ:
+                    os.environ.pop(key)
+                    os.unsetenv(key)
+            else:
+                val_str = str(val)
+                os.environ[key] = val_str
+                os.putenv(key, val_str)
         self.os_path_backup = os.environ["PATH"]
         os_paths = os.environ["PATH"].split(os.pathsep)
         if self.path in os_paths:

@@ -22,11 +22,11 @@ def test_skopeo():
     ) as e:
         resolver = Image_Version_Resolver()
         assert not test_cache.is_file()  # Cache file doesn't exist yet
-        image_tagged = "ghcr.io/immich-app/immich-server:v1.132.3"
+        image_tagged = "ghcr.io/immich-app/immich-server:release"
         image_hashed = resolver.resolve_image_version(image_tagged)
         assert image_hashed == (
             "ghcr.io/immich-app/immich-server@sha256:"
-            "6680d88486251b0264a78a1934fe82eef875555aa6d84d703a0980328a5d5c31"
+            "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210"
         )
         assert test_cache.is_file()  # Cache file exists now
 
@@ -43,6 +43,6 @@ def test_skopeo():
         image_hashed = resolver.resolve_image_version(image_tagged)
         assert image_hashed == (
             "ghcr.io/immich-app/immich-server@sha256:"
-            "6680d88486251b0264a78a1934fe82eef875555aa6d84d703a0980328a5d5c31"
+            "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210"
         )
         assert len(e.log) == 1
