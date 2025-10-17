@@ -2,7 +2,7 @@ from pathlib import Path
 from cipug.snapper import Snapper
 import pytest
 from tests.mock_tools.environment import Environment, LogEntry
-from tests.mock_tools.tools.snapper import Snapper as SnapperMock
+from tests.mock_tools import Snapper as SnapperMock
 
 
 def test_snapper():

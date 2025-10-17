@@ -23,18 +23,32 @@ class Environment:
     # environment variables such that cipug calls the MockTools instead of the real command
     # line tools. Also provides a convenient way to get the log of MockTool calls.
     tools: list[type[MockTool]]
-    tmpctx: tempfile.TemporaryDirectory[str]
+    env_overwrites: dict
+    env_overwrites_backup: dict
+    tmp_ctx: tempfile.TemporaryDirectory[str]
     logfile_path: Path
 
-    def __init__(self, tools: list[type[MockTool]]):
+    def __init__(
+        self,
+        tools: list[type[MockTool]],
+        env_overwrites: dict | None = None,
+        tmp_ctx: tempfile.TemporaryDirectory[str] | None = None
+    ):
         self.tools = tools
-        self.tmpctx = tempfile.TemporaryDirectory()
+        self.env_overwrites = env_overwrites or {}
+        self.tmp_ctx = tmp_ctx or tempfile.TemporaryDirectory()
         self.logfile_path = Path(self.path).resolve() / "tools_log.jsonl"
 
     def __enter__(self):
-        self.tmpctx.__enter__()
+        self.tmp_ctx.__enter__()
         for tool in self.tools:
             self._install_tool(tool)
+        self.env_overwrites_backup = {}
+        for key, val in self.env_overwrites.items():
+            self.env_overwrites_backup[key] = os.environ.get(key, None)
+            val_str = str(val)
+            os.environ[key] = val_str
+            os.putenv(key, val_str)
         self.os_path_backup = os.environ["PATH"]
         os_paths = os.environ["PATH"].split(os.pathsep)
         if self.path in os_paths:
@@ -61,12 +75,19 @@ class Environment:
         os.unsetenv("MOCK_TOOLS_LOGFILE")
         os.environ["PATH"] = self.os_path_backup
         os.putenv("PATH", os.environ["PATH"])
-        self.tmpctx.__exit__(exc_type, exc_val, exc_tb)
+        for key, val in self.env_overwrites_backup.items():
+            if val is None:
+                os.environ.pop(key)
+                os.unsetenv(key)
+            else:
+                os.environ[key] = val
+                os.putenv(key, val)
+        self.tmp_ctx.__exit__(exc_type, exc_val, exc_tb)
 
     @property
     def path(self) -> str:
         # The directory where the MockTool binaries are in
-        return self.tmpctx.name
+        return self.tmp_ctx.name
 
     def _install_tool(self, tool: type[MockTool]):
         dest = Path(self.path) / tool.name  # target binary path
