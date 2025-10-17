@@ -162,7 +162,7 @@ class Updater():
                     )
                     return False
             elif self.config["STOP_START_METHOD"] in ["systemd-system", "systemd-user"]:
-                systemd_service = f"{self.config['COMPOSE_TOOL']}@{svc_name}"
+                systemd_service = f"{self.config['COMPOSE_TOOL'].replace(' ', '-')}@{svc_name}"
                 log(
                     f"Restarting {self.config['STOP_START_METHOD'].replace('-',' ')} service {systemd_service}"
                 )
