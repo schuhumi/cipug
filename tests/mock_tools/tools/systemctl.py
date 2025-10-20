@@ -1,4 +1,5 @@
-from tests.mock_tools.tools.base import MockTool, Action
+from tests.mock_tools.tools.base import Action, MockTool
+
 
 class Systemctl(MockTool):
     name: str = "systemctl"

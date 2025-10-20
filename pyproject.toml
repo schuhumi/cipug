@@ -54,9 +54,10 @@ select = [
 ]
 ignore = [
     "PLC1901", # expression can be simplified as an empty string is falsey
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
     "PLR0913", # too many arguments to function call
     "PLR2004", # magic value used in comparison, consider replacing it with a constant variable
     "PLW2901", # loop variable overwritten by assignment target
     "RUF100", # Unused noqa directive
-    "UP038", # use `X | Y` in `isinstance` call instead of `(X, Y)`
 ]

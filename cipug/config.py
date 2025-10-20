@@ -1,13 +1,15 @@
+import json
+import os
+from collections.abc import Callable
 from pathlib import Path
 from tempfile import gettempdir
-import os
-import json
+from types import MappingProxyType
+from typing import Any, Generic, TypeVar
 
-from .log import log
-from . import exit_code
-
-from typing import Any, Callable, Generic, TypeVar
 from cipug.typing import JsonType
+
+from . import exit_code
+from .log import log
 
 T = TypeVar('T')
 
@@ -36,7 +38,7 @@ class Literally(Generic[T]):
     def __call__(self, val: T) -> T:
         if val not in self._valid_values:
             log.error(
-                f"Invalid value {repr(val)}, valid options are: {self._valid_values}",
+                f"Invalid value {val!r}, valid options are: {self._valid_values}",
                 exit_code = exit_code.VALUE_ERROR
             )
         return val
@@ -46,7 +48,7 @@ class Config(dict[str, Any]):
     """Get config for cipug from environment variables. This has
     nothing to do with the .env file for compose."""
     _instance = None
-    settings_schema: dict[str, tuple[Any, Callable[[Any], Any]]] = {
+    settings_schema: MappingProxyType[str, tuple[Any, Callable[[Any], Any]]] = MappingProxyType({
         "VERBOSITY": (1, int),
         "SERVICES_ROOT": (unset, Path),
         "SERVICES_FILTER": ("", str),
@@ -67,11 +69,11 @@ class Config(dict[str, Any]):
         "SNAPSHOTS_DIR_BTRBK": ("", str),
         "SNAPSHOTS_MAX_AGE_BTRBK": (36, float),
         "CONFIG_FILE": ("", str)
-    }
+    })
 
     def __new__(cls, *args, **kwargs):  #type: ignore
         if cls._instance is None:
-            cls._instance = super(Config, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             super(Config, cls._instance).__init__(*args, **kwargs)
         return cls._instance
 

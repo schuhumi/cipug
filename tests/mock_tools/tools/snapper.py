@@ -1,23 +1,25 @@
-import os
 import json
-from tests.mock_tools.tools.base import MockTool, Action
+import os
+
+from tests.mock_tools.tools.base import Action, MockTool
 
 
 class Snapper(MockTool):
     name: str = "snapper"
-    configs: list[dict[str, str]] = [
-        {
-            "config": "testconf-1",
-            "subvolume": "/fake/btrfs/subvolume/1",
-        },
-        {
-            "config": "testconf-2",
-            "subvolume": "/fake/btrfs/subvolume/2",
-        },
-    ]
+    configs: list[dict[str, str]]
 
     def __init__(self):
         super().__init__()
+        self.configs = [
+            {
+                "config": "testconf-1",
+                "subvolume": "/fake/btrfs/subvolume/1",
+            },
+            {
+                "config": "testconf-2",
+                "subvolume": "/fake/btrfs/subvolume/2",
+            },
+        ]
         # Enable adding another mock config subvolume via environment variable
         subvol: str | None = os.environ.get("MOCK_TOOL_SNAPPER_ENV_CONF", None)
         if subvol is not None:

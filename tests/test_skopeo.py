@@ -1,8 +1,10 @@
-from tempfile import TemporaryDirectory
 from pathlib import Path
+from tempfile import TemporaryDirectory
+
 from cipug.resolver import Image_Version_Resolver
-from tests.mock_tools.environment import Environment, LogEntry
 from tests.mock_tools import Skopeo as SkopeoMock
+from tests.mock_tools.environment import Environment, LogEntry
+
 
 def test_skopeo():
     # We want to work with a controlled test cache. Therefore we create

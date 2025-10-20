@@ -1,5 +1,7 @@
 from abc import ABC
-from tests.mock_tools.tools.base import MockTool, Action
+
+from tests.mock_tools.tools.base import Action, MockTool
+
 
 class Compose(MockTool, ABC):
     def run(self, argv: list[str]) -> Action:

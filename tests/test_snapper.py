@@ -1,8 +1,10 @@
 from pathlib import Path
-from cipug.snapper import Snapper
+
 import pytest
-from tests.mock_tools.environment import Environment, LogEntry
+
+from cipug.snapper import Snapper
 from tests.mock_tools import Snapper as SnapperMock
+from tests.mock_tools.environment import Environment, LogEntry
 
 
 def test_snapper():

@@ -1,10 +1,9 @@
+import json
 import os
 import sys
-import json
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import time
-
 
 logfile_env = "MOCK_TOOLS_LOGFILE"
 

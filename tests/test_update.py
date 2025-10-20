@@ -1,10 +1,13 @@
-from tempfile import TemporaryDirectory
 from pathlib import Path
 from subprocess import CompletedProcess
-from tests.mock_tools.environment import Environment, LogEntry
-from tests.mock_tools import PodmanCompose, DockerCompose, Snapper, Skopeo, Systemctl
-from tests.helper import call_cipug
+from tempfile import TemporaryDirectory
+
 import pytest
+
+from tests.helper import call_cipug
+from tests.mock_tools import DockerCompose, PodmanCompose, Skopeo, Snapper, Systemctl
+from tests.mock_tools.environment import Environment, LogEntry
+
 
 @pytest.mark.parametrize(
     "container_tool, service_stop_start, stop_start_method, do_snapshot, prune_images",
@@ -79,7 +82,8 @@ def test_update_podman_compose(
                 "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210"
         ])
 
-        log: list[LogEntry] = e.log  # e.log causes reading the logs from disk every time, which wouldn't work with pop() below
+        # e.log causes reading the logs from disk every time, which wouldn't work with pop() below
+        log: list[LogEntry] = e.log
 
         # Check that the correct order and arguments of called tools. Changes in how cipug works may require
         # reordering/adjustments here!

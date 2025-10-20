@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
 def clean_env() -> dict[str, str]:
     # Remove any existing cipug specific environment variables to not mess with the tests
     return {
@@ -25,9 +26,10 @@ def call_cipug(
         [
             sys.executable,  # current Python interpreter
             "-m",
-            "cipug"
-        ] + args,
-        cwd=Path(__file__).resolve().parent.parent,
+            "cipug",
+            *args
+        ],
+        check=False, cwd=Path(__file__).resolve().parent.parent,
         env=env_complete,
         capture_output=True,
         text=True

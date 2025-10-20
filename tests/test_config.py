@@ -1,14 +1,13 @@
-from tests.helper import call_cipug
-from subprocess import CompletedProcess
 import json
 import tempfile
 from pathlib import Path
+from subprocess import CompletedProcess
+
 import pytest
 
 from cipug.config import Config, unset
-
 from cipug.typing import JsonBaseType
-
+from tests.helper import call_cipug
 
 # Do not include config file path in these settings templates.
 # Also leave the verbosity level to default, otherwise the parsing of cipug's output may fail.

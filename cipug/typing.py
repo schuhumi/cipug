@@ -1,5 +1,4 @@
-from typing import TypeVar, Any
-
+from typing import Any, TypeVar
 
 JsonBaseType = str | float | int | bool | None
 JsonType = dict[str, "JsonType"] | list["JsonType"] | JsonBaseType

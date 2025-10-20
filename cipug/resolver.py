@@ -1,12 +1,13 @@
 import json
-import time
 import subprocess
+import time
 from dataclasses import dataclass
-
-from .log import log
-from .config import Config
-from cipug.typing import JsonDictType, ensure_type
 from typing import Any
+
+from cipug.typing import JsonDictType, ensure_type
+
+from .config import Config
+from .log import log
 
 
 @dataclass
@@ -15,7 +16,7 @@ class CacheEntry:
     result: str
 
 
-class Image_Version_Resolver():
+class Image_Version_Resolver:
     """Uses skopeo to resolve container tags like ":latest" to their respective
     hashed tag. It also caches results to not hit docker-hubs restrictive
     rate limit so quickly."""

@@ -1,11 +1,11 @@
-import subprocess
-from pathlib import Path
 import glob
 import os
+import subprocess
+from pathlib import Path
 
-from .log import log
-from .config import Config
 from . import exit_code
+from .config import Config
+from .log import log
 
 
 def get_services() -> list[Path]:
@@ -96,7 +96,7 @@ def prune_images():
     if config["PRUNE_IMAGES"]:
         log("Pruning images..")
         ret = subprocess.run(
-            config["CONTAINER_TOOL"].split(" ") + ["image", "prune", "-f"]
+            [*config["CONTAINER_TOOL"].split(" "), "image", "prune", "-f"], check=False
         ).returncode
         if ret != 0:
             log.error(

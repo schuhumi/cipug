@@ -1,12 +1,13 @@
-import tempfile
+import json
 import os
 import stat
-import json
-from pathlib import Path
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 from types import TracebackType
+
 import tests
-from tests.mock_tools.tools.base import MockTool, Action, logfile_env
+from tests.mock_tools.tools.base import Action, MockTool, logfile_env
 
 
 @dataclass
@@ -21,7 +22,7 @@ class LogEntry:
 
     @property
     def cmdline(self) -> list[str]:
-        return [self.name] + self.argv[1:]
+        return [self.name, *self.argv[1:]]
 
 
 class Environment:
@@ -71,7 +72,7 @@ class Environment:
                 "Unexpectedly found temporary tools environment in $PATH before setting it up. "
                 "Be aware that the mock_tools environment isn't suited for concurrency!"
             )
-        os.environ["PATH"] = os.pathsep.join([self.path] + os_paths)
+        os.environ["PATH"] = os.pathsep.join([self.path, *os_paths])
         # Changes in os.environ only effect Python-land. For the underlying C-land to know about
         # the environment variable changes, additional calls to os.putenv() and os.unsetenv() are
         # necessary. (That is important because the subprocesses get spawned in C-land)
@@ -122,7 +123,7 @@ class Environment:
         dest.write_text(
             f"""#!/usr/bin/env python3
 import sys
-sys.path.insert(0, '{str(pypath)}')
+sys.path.insert(0, '{pypath!s}')
 from {tool.__module__} import {tool.__name__}
 t = {tool.__name__}()
 t._call()
@@ -137,7 +138,7 @@ t._call()
         if not self.logfile_path.is_file():
             return []
         log: list[LogEntry] = []
-        with open(self.logfile_path, "r") as logf:
+        with open(self.logfile_path) as logf:
             for line in logf:
                 jentry = json.loads(line)
                 action = Action(
