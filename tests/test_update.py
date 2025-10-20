@@ -47,7 +47,7 @@ def test_update_podman_compose(
         # The testing .env with a random outdated hash
         example_env.write_text(
             "SERVICE_IMMICHSERVER_IMAGE_TAGGED=ghcr.io/immich-app/immich-server:release\n"
-            "ERVICE_IMMICHSERVER_IMAGE_HASHED=ghcr.io/immich-app/immich-server@"
+            "SERVICE_IMMICHSERVER_IMAGE_HASHED=ghcr.io/immich-app/immich-server@"
             "sha256:8286638680f0a38a7cb380be64ed77d1d1cfe6d0e0b843f64bff92b24289078d"
         )
 
@@ -70,9 +70,13 @@ def test_update_podman_compose(
         print(cp.stderr)
 
         assert cp.returncode == 0
-        # This hash is what the skopeo mock tool has stored for resolving immich:release. After running
-        # cipug we should find it in .env.
-        assert "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210" in example_env.read_text()
+        assert sorted(example_env.read_text().splitlines()) == sorted([
+            "SERVICE_IMMICHSERVER_IMAGE_TAGGED=ghcr.io/immich-app/immich-server:release",
+            # This hash is what the skopeo mock tool has stored for resolving immich:release. After running
+            # cipug we should find it in .env.
+            "SERVICE_IMMICHSERVER_IMAGE_HASHED=ghcr.io/immich-app/immich-server@sha256:"
+                "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210"
+        ])
 
         log = e.log  # e.log causes reading the logs from disk every time, which wouldn't work with pop() below
 
