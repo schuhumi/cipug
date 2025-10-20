@@ -27,20 +27,22 @@ class Image_Version_Resolver:
         self.cache_duration = config["CACHE_DURATION"]
         self.cache: dict[str, CacheEntry] = {}
         log.vverbose(f"Image-Version-Resolver cache file is set to {self.cache_file}")
-        if self.cache_file.is_file():
-            # A cache file exists already
-            j = ensure_type(
+        if self.cache_file.is_file(): # A cache file exists already
+            # due to isinstance() in ensure_type() we can only pass it a un-parametrized generic here.
+            # That again doesn't make the linter happy...
+            j: JsonDictType = ensure_type(  # type: ignore[reportUnknownVariableType]
                 json.loads(self.cache_file.read_text()),
-                JsonDictType,
+                dict,
                 "Outer structure of cache needs to be dict"
             )
             for name, properties in j.items():
-                p = ensure_type(
+                p: dict[str, Any] = ensure_type( # type: ignore[reportUnknownVariableType]
                     properties,
-                    dict[str, Any],
+                    dict,
                     "First level values of cache need to be dicts"
                 )
-                self.cache[name] = CacheEntry(
+                n: str = ensure_type(name, str)
+                self.cache[n] = CacheEntry(
                     time=ensure_type(
                         p["time"],
                         float,

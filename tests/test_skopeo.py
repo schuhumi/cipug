@@ -47,3 +47,11 @@ def test_skopeo():
             "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210"
         )
         assert len(e.log) == 1
+
+        # Test loading the cache from disk
+        resolver2 = Image_Version_Resolver()
+        assert sorted(resolver.cache.keys()) == sorted(resolver2.cache.keys())
+        for key, entry_1 in resolver.cache.items():
+            entry_2 = resolver2.cache[key]
+            assert entry_1.time == entry_2.time
+            assert entry_1.result == entry_2.result
