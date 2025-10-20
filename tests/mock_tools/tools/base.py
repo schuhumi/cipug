@@ -6,6 +6,9 @@ from dataclasses import dataclass
 import time
 
 
+logfile_env = "MOCK_TOOLS_LOGFILE"
+
+
 @dataclass
 class Action:
     # When a MockTool is called, it checks the arguments and populates the Action
@@ -19,12 +22,11 @@ class MockTool(ABC):
     name: str  # the name of the binary
 
     def __init__(self):
-        logfile_env_name = "MOCK_TOOLS_LOGFILE"
-        self.log_path: str | None = os.environ.get(logfile_env_name, None)
-
-        if self.log_path is None:
+        try:
+            self.log_path: str = os.environ[logfile_env]
+        except KeyError:
             raise RuntimeError(
-                f"Environment variable {logfile_env_name} for jsonl style logfile is required!"
+                f"Environment variable {logfile_env} for jsonl style logfile is required!"
             )
 
     @abstractmethod
@@ -36,8 +38,6 @@ class MockTool(ABC):
         argv = sys.argv
         action: Action = self.run(argv)
 
-        if self.log_path is None:
-            raise RuntimeError("log_path not initialized")
 
         # Write a jsonl-style logfile
         # https://jsonltools.com/what-is-jsonl

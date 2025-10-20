@@ -4,7 +4,6 @@ from cipug.resolver import Image_Version_Resolver
 from tests.mock_tools.environment import Environment, LogEntry
 from tests.mock_tools import Skopeo as SkopeoMock
 
-
 def test_skopeo():
     # We want to work with a controlled test cache. Therefore we create
     # a temporary directory with our cache in it.
@@ -15,8 +14,8 @@ def test_skopeo():
     with Environment(
         tools = [SkopeoMock],
         env_overwrites = {
-            "CIPUG_CACHE_LOCATION": test_cache,
-            "CIPUG_CACHE_DURATION": 3600
+            "CIPUG_CACHE_LOCATION": str(test_cache.resolve()),
+            "CIPUG_CACHE_DURATION": str(3600)
         },
         tmp_ctx = tmp_ctx  # reuse the temporary directory for the environment
     ) as e:

@@ -21,7 +21,7 @@ class log():
 
     @classmethod
     @overload
-    def error(cls, msg: str):
+    def error(cls, msg: str) -> None:
         ...
 
     @classmethod

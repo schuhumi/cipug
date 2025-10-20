@@ -15,6 +15,8 @@ from .utils import check_dependencies, prune_images
 from .snapshots import Snapshot_Checker
 from . import exit_code
 
+from typing import Any
+
 def main():
     config = Config()
 
@@ -26,10 +28,10 @@ def main():
         import json
         from pathlib import Path
         class PosixPathEncoder(json.JSONEncoder):
-            def default(self, obj):
-                if isinstance(obj, Path):
-                    return str(obj.resolve())
-                return super().default(obj)
+            def default(self, o: Any):
+                if isinstance(o, Path):
+                    return str(o.resolve())
+                return super().default(o)
 
         json.dump(config, sys.stdout, indent=4, cls=PosixPathEncoder)
         return

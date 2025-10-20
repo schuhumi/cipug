@@ -47,7 +47,7 @@ class Snapper(MockTool):
                     indent=2,
                 )
                 return Action(stdout=stdout)
-            case ["-c", config_name, "create", "--description", message]:
+            case ["-c", config_name, "create", "--description", _]:
                 if config_name in self.config_names:
                     # pretend we successfully took a snapshot
                     return Action()

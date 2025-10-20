@@ -1,5 +1,6 @@
 from tempfile import TemporaryDirectory
 from pathlib import Path
+from subprocess import CompletedProcess
 from tests.mock_tools.environment import Environment, LogEntry
 from tests.mock_tools import PodmanCompose, DockerCompose, Snapper, Skopeo, Systemctl
 from tests.helper import call_cipug
@@ -51,7 +52,7 @@ def test_update_podman_compose(
             "sha256:8286638680f0a38a7cb380be64ed77d1d1cfe6d0e0b843f64bff92b24289078d"
         )
 
-        cp: CompletedProcess = call_cipug(
+        cp: CompletedProcess[str] = call_cipug(
             env={
                 "CIPUG_SERVICES_ROOT": test_services,
                 "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
@@ -78,7 +79,7 @@ def test_update_podman_compose(
                 "72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210"
         ])
 
-        log = e.log  # e.log causes reading the logs from disk every time, which wouldn't work with pop() below
+        log: list[LogEntry] = e.log  # e.log causes reading the logs from disk every time, which wouldn't work with pop() below
 
         # Check that the correct order and arguments of called tools. Changes in how cipug works may require
         # reordering/adjustments here!

@@ -1,7 +1,9 @@
 from tests.mock_tools.tools.base import MockTool, Action
 import json
 
-mock_data  = {
+from cipug.typing import JsonDictType
+
+mock_data: JsonDictType  = {
     "docker://ghcr.io/immich-app/immich-server:release": {
         "Name": "ghcr.io/immich-app/immich-server",
         "Digest": "sha256:72a9b9de6c6abfa7a9c9cdc244ae4d2bd9fea2ae00997f194cbd10aca72ea210",

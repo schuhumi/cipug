@@ -5,7 +5,7 @@ class Systemctl(MockTool):
 
     def run(self, argv: list[str]) -> Action:
         match argv[1:]:
-            case ["--user", "restart", unit] | ["restart", unit]:
+            case ["--user", "restart", _] | ["restart", _]:
                 return Action()
         return Action(
             returncode=99, stderr="Error: Invalid command for systemd MockTool"

@@ -4,7 +4,9 @@ import stat
 import json
 from pathlib import Path
 from dataclasses import dataclass
-from tests.mock_tools.tools.base import MockTool, Action
+from types import TracebackType
+import tests
+from tests.mock_tools.tools.base import MockTool, Action, logfile_env
 
 
 @dataclass
@@ -27,15 +29,15 @@ class Environment:
     # environment variables such that cipug calls the MockTools instead of the real command
     # line tools. Also provides a convenient way to get the log of MockTool calls.
     tools: list[type[MockTool]]
-    env_overwrites: dict
-    env_overwrites_backup: dict
+    env_overwrites: dict[str, str | None]  # None means the variable should be deleted
+    env_overwrites_backup: dict[str, str | None]
     tmp_ctx: tempfile.TemporaryDirectory[str]
     logfile_path: Path
 
     def __init__(
         self,
         tools: list[type[MockTool]],
-        env_overwrites: dict | None = None,
+        env_overwrites: dict[str, str | None] | None = None,
         tmp_ctx: tempfile.TemporaryDirectory[str] | None = None
     ):
         self.tools = tools
@@ -74,18 +76,23 @@ class Environment:
         # the environment variable changes, additional calls to os.putenv() and os.unsetenv() are
         # necessary. (That is important because the subprocesses get spawned in C-land)
         os.putenv("PATH", os.environ["PATH"])
-        if "MOCK_TOOLS_LOGFILE" in os.environ:
+        if logfile_env in os.environ:
             raise RuntimeError(
                 "Unexpectedly found MOCK_TOOLS_LOGFILE environment variable before setting it up. "
                 "Be aware that the mock_tools environment isn't suited for concurrency!"
             )
-        os.environ["MOCK_TOOLS_LOGFILE"] = str(self.logfile_path)
-        os.putenv("MOCK_TOOLS_LOGFILE", os.environ["MOCK_TOOLS_LOGFILE"])
+        os.environ[logfile_env] = str(self.logfile_path)
+        os.putenv(logfile_env, os.environ[logfile_env])
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        os.environ.pop("MOCK_TOOLS_LOGFILE")
-        os.unsetenv("MOCK_TOOLS_LOGFILE")
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None
+    ):
+        os.environ.pop(logfile_env)
+        os.unsetenv(logfile_env)
         os.environ["PATH"] = self.os_path_backup
         os.putenv("PATH", os.environ["PATH"])
         for key, val in self.env_overwrites_backup.items():
@@ -106,7 +113,7 @@ class Environment:
         dest = Path(self.path) / tool.name  # target binary path
         # The mocktool needs to load the tests.mock_tools module, therefore
         # we need the path to tests for prepending it to PYTHONPATH
-        pypath = Path(__file__).resolve().parent.parent.parent
+        pypath = Path(tests.__file__).resolve().parent
         # The binary is a small python snippet that imports the respective
         # MockTool class from the tests.mock_tools module, makes an instance
         # and calls it. The _call() is handled in tests/mock_tools/tools/base.py.

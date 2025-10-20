@@ -16,6 +16,7 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest"]
+lint = ["basedpyright", "ruff"]
 
 [project.urls]
 Repository = "https://github.com/schuhumi/cipug.git"
@@ -26,3 +27,36 @@ cipug = "cipug:main"
 [tool.uv.build-backend]
 module-root = ""
 module-name = "cipug"
+
+[tool.basedpyright]
+typeCheckingMode = "strict"
+reportUnusedCallResult = "none"
+reportExplicitAny = "none"
+reportAny = "none"
+reportMissingParameterType = true
+reportUnknownVariableType = true
+reportReturnType = true
+reportMissingTypeArgument = true
+reportMatchNotExhaustive = "none"
+
+[tool.ruff]
+line-length = 120
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "F", # pyflakes
+    "I", # isort
+    "ICN", # import conventions
+    "PL", # pylint
+    "RUF", # ruff
+    "UP", # pyupgrade
+    "W", # pycodestyle warnings
+]
+ignore = [
+    "PLC1901", # expression can be simplified as an empty string is falsey
+    "PLR0913", # too many arguments to function call
+    "PLR2004", # magic value used in comparison, consider replacing it with a constant variable
+    "PLW2901", # loop variable overwritten by assignment target
+    "RUF100", # Unused noqa directive
+    "UP038", # use `X | Y` in `isinstance` call instead of `(X, Y)`
+]

@@ -7,15 +7,17 @@ import pytest
 
 from cipug.config import Config, unset
 
+from cipug.typing import JsonBaseType
+
 
 # Do not include config file path in these settings templates.
 # Also leave the verbosity level to default, otherwise the parsing of cipug's output may fail.
-Settings_A = {
+Settings_A: dict[str, JsonBaseType] = {
     "SERVICES_ROOT": "/some/path",
     "COMPOSE_TOOL": "podman compose",
     "CONTAINER_TOOL": "podman",
 }
-Settings_B = {
+Settings_B: dict[str, JsonBaseType] = {
     "COMPOSE_TOOL": "docker compose",
     "CONTAINER_TOOL": "docker",
     "SERVICE_PULL": True,
@@ -38,7 +40,7 @@ Settings_Required = [
     ({}, Settings_A),
     ({}, Settings_B)
 ])
-def test_config_loading(env_settings: dict, file_settings: dict):
+def test_config_loading(env_settings: dict[str, JsonBaseType], file_settings: dict[str, JsonBaseType]):
     # Test that config file loading works and that environment varibles have priority
 
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -56,9 +58,9 @@ def test_config_loading(env_settings: dict, file_settings: dict):
             print(f"Config file location: {config_file}")
             print(f"Config file content: {config_file.read_text()}")
         else:
-            print(f"No config file in use.")
+            print("No config file in use.")
 
-        cp: CompletedProcess = call_cipug(
+        cp: CompletedProcess[str] = call_cipug(
             args=["--print-config-json"],
             env={
                 f"CIPUG_{key}":val for key, val in env_settings.items()
@@ -117,7 +119,7 @@ def test_config_file_in_config_file():
                 indent=2
             )
         )
-        cp: CompletedProcess = call_cipug(
+        cp: CompletedProcess[str] = call_cipug(
             args=["--print-config-json"],
             env={
                 "CIPUG_CONFIG_FILE": str(config_file.resolve())

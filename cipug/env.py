@@ -3,7 +3,7 @@ import copy
 
 from cipug.log import log
 
-class Env(dict):
+class Env(dict[str, str]):
     """Handle .env files for compose. This includes:
         - loading .env file as dictionary
         - changing entries

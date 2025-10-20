@@ -11,6 +11,7 @@ from .snapper import Snapper
 from .utils import get_services
 from . import exit_code
 
+
 class Updater():
     def __init__(
         self,
@@ -31,7 +32,7 @@ class Updater():
                 # Check for environment variables in the tagged image (${VAR} format)
                 import re
                 def replace_env_vars(s: str, vars: dict[str, str]):
-                    def replace_var(match: re.Match) -> str:
+                    def replace_var(match: re.Match[str]) -> str:
                         var_name: str = match.group(1)
                         fallback: str = match.group(0)
                         return vars.get(var_name, fallback)
