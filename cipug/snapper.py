@@ -4,7 +4,8 @@ from pathlib import Path
 
 from .log import log
 
-class Snapper():
+
+class Snapper:
     """Interact with the snapper utility. Specifically, it can create snapshots
     of subvolumes specified by volume path. It does that by going through snapper's
     configs and finding out which one belongs to that path. That way, cipug does not
@@ -30,13 +31,13 @@ class Snapper():
             raise KeyError(f"No snapper config found for folder {path}")
 
         completed_process = subprocess.run([
-	        "snapper",
-	        "-c",
-	        config_name,
-	        "create",
-	        "--description",
-	        message
-        ])
+            "snapper",
+            "-c",
+            config_name,
+            "create",
+            "--description",
+            message
+        ], check=False)
         if completed_process.returncode != 0:
             raise Exception(
                 f"Failed to snapshot using config {config_name}, "

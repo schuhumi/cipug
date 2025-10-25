@@ -4,16 +4,20 @@
 Welcome to cipug, the container images pinning and updating gadget.
 """
 
+import json
 import sys
+from pathlib import Path
+from typing import Any
 
-from .log import log
+from . import exit_code
 from .config import Config
+from .log import log
 from .resolver import Image_Version_Resolver
 from .snapper import Snapper
+from .snapshots import Snapshot_Checker
 from .updater import Updater
 from .utils import check_dependencies, prune_images
-from .snapshots import Snapshot_Checker
-from . import exit_code
+
 
 def main():
     config = Config()
@@ -23,13 +27,11 @@ def main():
         return
 
     if "--print-config-json" in sys.argv:
-        import json
-        from pathlib import Path
         class PosixPathEncoder(json.JSONEncoder):
-            def default(self, obj):
-                if isinstance(obj, Path):
-                    return str(obj.resolve())
-                return super().default(obj)
+            def default(self, o: Any):
+                if isinstance(o, Path):
+                    return str(o.resolve())
+                return super().default(o)
 
         json.dump(config, sys.stdout, indent=4, cls=PosixPathEncoder)
         return

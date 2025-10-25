@@ -1,17 +1,19 @@
-from pathlib import Path
-from datetime import datetime
+import re
 import subprocess
+from datetime import datetime
+from pathlib import Path
 
+from . import exit_code
 from .colors import colors
 from .config import Config
-from .log import log
 from .env import Env
+from .log import log
 from .resolver import Image_Version_Resolver
 from .snapper import Snapper
 from .utils import get_services
-from . import exit_code
 
-class Updater():
+
+class Updater:
     def __init__(
         self,
         resolver: Image_Version_Resolver,
@@ -29,9 +31,8 @@ class Updater():
                 image_tagged = env[key]
 
                 # Check for environment variables in the tagged image (${VAR} format)
-                import re
                 def replace_env_vars(s: str, vars: dict[str, str]):
-                    def replace_var(match: re.Match) -> str:
+                    def replace_var(match: re.Match[str]) -> str:
                         var_name: str = match.group(1)
                         fallback: str = match.group(0)
                         return vars.get(var_name, fallback)
@@ -80,8 +81,8 @@ class Updater():
     def _check_permission_compose_tool(self, folder: Path, svc_name: str) -> bool:
         log(f"Ensuring permission for \"{self.config['COMPOSE_TOOL']}\"..")
         cp = subprocess.run(
-            self.config["COMPOSE_TOOL"].split(" ") + ["ps"],
-            cwd=folder,
+            [*self.config["COMPOSE_TOOL"].split(" "), "ps"],
+            check=False, cwd=folder,
             capture_output=True
         )
         ret = cp.returncode
@@ -100,7 +101,7 @@ class Updater():
             try:
                 self.snapper.snapshot_folder(
                     folder,
-                    message=f"Update container images {str(datetime.today())}"
+                    message=f"Update container images {datetime.today()!s}"
                 )
             except Exception as e:
                 log.error(
@@ -126,8 +127,8 @@ class Updater():
         if self.config["SERVICE_PULL"]:
             log(f"pulling images for service \"{svc_name}\"..")
             ret = subprocess.run(
-                self.config["COMPOSE_TOOL"].split(" ") + ["pull"],
-                cwd=folder
+                [*self.config["COMPOSE_TOOL"].split(" "), "pull"],
+                check=False, cwd=folder
             ).returncode
             if ret != 0:
                 log.error(
@@ -142,8 +143,8 @@ class Updater():
             if self.config["STOP_START_METHOD"] == "compose":
                 log(f"stopping service \"{svc_name}\"..")
                 ret = subprocess.run(
-                    self.config["COMPOSE_TOOL"].split(" ") + ["down"],
-                    cwd=folder
+                    [*self.config["COMPOSE_TOOL"].split(" "), "down"],
+                    check=False, cwd=folder
                 ).returncode
                 if ret != 0:
                     log.error(
@@ -153,8 +154,8 @@ class Updater():
 
                 log(f"Starting \"{svc_name}\" service..")
                 ret = subprocess.run(
-                    self.config["COMPOSE_TOOL"].split(" ") + ["up", "-d"],
-                    cwd=folder
+                    [*self.config["COMPOSE_TOOL"].split(" "), "up", "-d"],
+                    check=False, cwd=folder
                 ).returncode
                 if ret != 0:
                     log.error(
@@ -162,7 +163,7 @@ class Updater():
                     )
                     return False
             elif self.config["STOP_START_METHOD"] in ["systemd-system", "systemd-user"]:
-                systemd_service = f"{self.config['COMPOSE_TOOL']}@{svc_name}"
+                systemd_service = f"{self.config['COMPOSE_TOOL'].replace(' ', '-')}@{svc_name}"
                 log(
                     f"Restarting {self.config['STOP_START_METHOD'].replace('-',' ')} service {systemd_service}"
                 )
@@ -170,7 +171,7 @@ class Updater():
                 if "-user" in self.config["STOP_START_METHOD"]:
                     cmdlist.append("--user")
                 cmdlist += ["restart", systemd_service]
-                ret = subprocess.run(cmdlist, cwd=folder).returncode
+                ret = subprocess.run(cmdlist, check=False, cwd=folder).returncode
                 if ret != 0:
                     log.error(
                         f"Failed to restart service \"{svc_name}\" (returncode {ret})"

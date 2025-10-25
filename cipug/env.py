@@ -1,9 +1,10 @@
-from pathlib import Path
 import copy
+from pathlib import Path
 
 from cipug.log import log
 
-class Env(dict):
+
+class Env(dict[str, str]):
     """Handle .env files for compose. This includes:
         - loading .env file as dictionary
         - changing entries
@@ -12,7 +13,7 @@ class Env(dict):
     """
     def __init__(self, path: Path):
         self.path = path  # Remember for writing back to disk
-        with open(path, "r") as f:
+        with open(path) as f:
             # .env file entries can be multiple lines, by adding \ before line ends.
             # If we find such a line, use the following variable to remember which
             # entry to append the next line to.

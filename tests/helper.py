@@ -2,8 +2,10 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
-def clean_env() -> dict:
+
+def clean_env() -> dict[str, str]:
     # Remove any existing cipug specific environment variables to not mess with the tests
     return {
         key:val for key, val in os.environ.copy().items()
@@ -11,9 +13,9 @@ def clean_env() -> dict:
     }
 
 def call_cipug(
-    env: dict | None = None,
+    env: dict[str, Any] | None = None,
     args: list[str] | None = None
-) -> subprocess.CompletedProcess:
+) -> subprocess.CompletedProcess[str]:
     env_complete = clean_env().copy()
     if env is not None:
         for key, val in env.items():
@@ -24,9 +26,10 @@ def call_cipug(
         [
             sys.executable,  # current Python interpreter
             "-m",
-            "cipug"
-        ] + args,
-        cwd=Path(__file__).resolve().parent.parent,
+            "cipug",
+            *args
+        ],
+        check=False, cwd=Path(__file__).resolve().parent.parent,
         env=env_complete,
         capture_output=True,
         text=True

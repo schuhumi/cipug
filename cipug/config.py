@@ -1,10 +1,17 @@
+import json
+import os
+from collections.abc import Callable
 from pathlib import Path
 from tempfile import gettempdir
-import os
-import json
+from types import MappingProxyType
+from typing import Any, Generic, TypeVar
 
-from .log import log
+from cipug.typing import JsonType
+
 from . import exit_code
+from .log import log
+
+T = TypeVar('T')
 
 unset = object()  # Flag that there is no default -> variable is required
 not_supplied = object()  # Flag that a environment variable wasn't supplied
@@ -24,24 +31,24 @@ class Str2Bool:
         )
 
 
-class Literally:
-    def __init__(self, valid_values: list):
+class Literally(Generic[T]):
+    def __init__(self, valid_values: list[T]):
         self._valid_values = valid_values
 
-    def __call__(self, val):
+    def __call__(self, val: T) -> T:
         if val not in self._valid_values:
             log.error(
-                f"Invalid value {repr(val)}, valid options are: {self._valid_values}",
+                f"Invalid value {val!r}, valid options are: {self._valid_values}",
                 exit_code = exit_code.VALUE_ERROR
             )
         return val
 
 
-class Config(dict):
+class Config(dict[str, Any]):
     """Get config for cipug from environment variables. This has
     nothing to do with the .env file for compose."""
     _instance = None
-    settings_schema = {
+    settings_schema: MappingProxyType[str, tuple[Any, Callable[[Any], Any]]] = MappingProxyType({
         "VERBOSITY": (1, int),
         "SERVICES_ROOT": (unset, Path),
         "SERVICES_FILTER": ("", str),
@@ -62,11 +69,11 @@ class Config(dict):
         "SNAPSHOTS_DIR_BTRBK": ("", str),
         "SNAPSHOTS_MAX_AGE_BTRBK": (36, float),
         "CONFIG_FILE": ("", str)
-    }
-    
-    def __new__(cls, *args, **kwargs):
+    })
+
+    def __new__(cls, *args, **kwargs):  #type: ignore
         if cls._instance is None:
-            cls._instance = super(Config, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             super(Config, cls._instance).__init__(*args, **kwargs)
         return cls._instance
 
@@ -77,7 +84,7 @@ class Config(dict):
             if not config_path.is_file():
                 log.error(f"Could not find config file {config_path}", exit_code=exit_code.FILE_NOT_FOUND)
             try:
-                config_from_file = json.loads(config_path.read_text())
+                config_from_file: JsonType = json.loads(config_path.read_text())
             except Exception as e:
                 log.error(
                     f"Could not read config file {config_path}: {e}",

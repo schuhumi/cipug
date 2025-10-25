@@ -2,9 +2,10 @@ import sys
 from typing import NoReturn, overload
 
 from .colors import colors
-from .exit_code import Exit_Code, MULTIPLE_ERRORS
+from .exit_code import MULTIPLE_ERRORS, Exit_Code
 
-class log():
+
+class log:
     """Simple logging functionality, use:
     log("message") for normal output
     log.error("message", exit_code) for errors on stderr with optional exiting
@@ -21,7 +22,7 @@ class log():
 
     @classmethod
     @overload
-    def error(cls, msg: str):
+    def error(cls, msg: str) -> None:
         ...
 
     @classmethod
@@ -30,7 +31,7 @@ class log():
         ...
 
     @classmethod
-    def error(cls, msg: str, exit_code: Exit_Code | list[Exit_Code] |  None = None) -> NoReturn | None:
+    def error(cls, msg: str, exit_code: Exit_Code | list[Exit_Code] |  None = None) -> None:
         if isinstance(exit_code, Exit_Code):
             msg = f"[{exit_code.code}={exit_code.name}] " + msg
         elif isinstance(exit_code, list):
