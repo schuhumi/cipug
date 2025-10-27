@@ -25,8 +25,8 @@ def test_update_podman_compose(
     do_snapshot: bool,
     prune_images: bool,
 ):
-    # Complete End2End test, where cipug updates a non-existing immich service in the
-    # testing environment with only mock tools.
+    """Complete End2End test, where cipug updates a non-existing immich service in the
+    testing environment with only mock tools."""
 
     # We want to work with a controlled test cache. Therefore we create
     # a temporary directory with our cache in it. We also use that for our service.
@@ -65,6 +65,7 @@ def test_update_podman_compose(
                 "CIPUG_SERVICE_STOP_START": service_stop_start,
                 "CIPUG_STOP_START_METHOD": stop_start_method,
                 "CIPUG_SERVICE_SNAPSHOT": do_snapshot,
+                "CIPUG_SNAPSHOT_TOOL": "snapper",
                 "CIPUG_PRUNE_IMAGES": prune_images,
                 "CIPUG_CACHE_LOCATION": test_cache,
                 "CIPUG_CACHE_DURATION": 3600,

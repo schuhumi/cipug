@@ -53,6 +53,7 @@ select = [
     "W", # pycodestyle warnings
 ]
 ignore = [
+    "PLC0415", # 'import' should be at the top level of a file
     "PLC1901", # expression can be simplified as an empty string is falsey
     "PLR0911", # Too many return statements
     "PLR0912", # Too many branches

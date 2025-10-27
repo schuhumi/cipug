@@ -1,14 +1,14 @@
 import glob
 import os
 import subprocess
-from pathlib import Path
 
 from . import exit_code
 from .config import Config
 from .log import log
+from .service import Service
 
 
-def get_services() -> list[Path]:
+def get_services() -> list[Service]:
     config = Config()
     if not config["SERVICES_ROOT"].is_dir():
         log.error(
@@ -22,7 +22,7 @@ def get_services() -> list[Path]:
         f"Searching for pattern \"{pattern}\" at {config['SERVICES_ROOT']}"
     )
 
-    services: list[Path] = []  # list of folders with a compose and env file
+    services: list[Service] = []  # list of folders with a compose and env file
     for result in glob.glob(
         pattern,
         root_dir=config["SERVICES_ROOT"]
@@ -34,20 +34,20 @@ def get_services() -> list[Path]:
                 f"Found {compose_file} but no {env_file}, skipping this folder"
             )
             continue
-        services.append(compose_file.parent)
+        services.append(Service(compose_file.parent))
 
     if config["SERVICES_FILTER"] != "":
         filter = config["SERVICES_FILTER"].split(",")
         log.verbose(f"Filtering services to be one of {filter}")
         services = [
-            entry for entry in services if entry.stem in filter
+            service for service in services if service.name in filter
         ]
 
     if config["SERVICES_FILTER_EXCLUDE"] != "":
         filter = config["SERVICES_FILTER_EXCLUDE"].split(",")
         log.verbose(f"Filtering services to not include any of {filter}")
         services = [
-            entry for entry in services if entry.stem not in filter
+            service for service in services if service.name not in filter
         ]
 
     if len(services)==1:
@@ -56,10 +56,9 @@ def get_services() -> list[Path]:
         log.verbose(f"Found {len(services)} services:")
     else:
         log.verbose("Did not find any services.")
-    for svc in services:
-        log.verbose(f" - {svc}")
+    for service in services:
+        log.verbose(f" - {service}")
     return services
-
 
 
 def check_dependencies():
