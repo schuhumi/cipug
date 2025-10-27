@@ -16,7 +16,6 @@ snapshot_check_tools = Toolbox[type[SnapshotCheckTool]]([
 __all__ = [
     "Btrbk",
     "Snapper",
-    "Snapper",
     "SnapshotCheckTool",
     "SnapshotCreationTool",
     "snapshot_check_tools",

@@ -20,7 +20,7 @@ class Btrbk(SnapshotCheckTool):
         if not subdir:
             return None
         dir = service.path / subdir
-        if not dir.is_dir:
+        if not dir.is_dir():
             log.error(f"{dir} is not a folder")
 
         try:

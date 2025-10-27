@@ -78,7 +78,7 @@ def test_snapshot_check():
         print(cp.stderr)
         assert cp.returncode == SNAPSHOTS_NOK.code
 
-        # Test 2: Create btrbk snapshots and check for their existence.
+        # Test 4: Create btrbk snapshots and check for their existence.
         # Create the mock-snapshot manually since there exists not mock-btrbk-tool
         # as btrbk works autonomously (not being called by cipug)
         now: str = datetime.now().strftime("%Y%m%dT%H%M")
