@@ -93,9 +93,9 @@ def test_update_podman_compose(
             assert log.pop(0).cmdline == [container_tool, "--version"]
         if do_snapshot:
             assert log.pop(0).cmdline == ["snapper", "--version"]
+            assert log.pop(0).cmdline == ["snapper", "--jsonout", "list-configs"]
         if prune_images:
             assert log.pop(0).cmdline == [container_tool, "image", "prune", "-f"]
-        assert log.pop(0).cmdline == ["snapper", "--jsonout", "list-configs"]
         assert log.pop(0).cmdline[:3] == ["skopeo", "inspect", "--no-tags"]
         assert log.pop(0).cmdline == [container_tool, "compose", "ps"]
         if do_snapshot:

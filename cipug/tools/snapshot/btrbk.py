@@ -15,6 +15,14 @@ class Btrbk(SnapshotCheckTool):
 
         self.config = Config()
 
+    @classmethod
+    def assert_dependencies(cls):
+        """We do not need to call btrbk. It doesn't even need to be installed, as backups
+        can be initiated by the backup server. Therefore we do not have any dependencies
+        to verify.
+        """
+        return
+
     def get_last_snapshot_date(self, service: Service) -> datetime | None:
         subdir = self.config["SNAPSHOTS_DIR_BTRBK"]
         if not subdir:

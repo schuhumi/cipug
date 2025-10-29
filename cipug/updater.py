@@ -14,7 +14,7 @@ from .utils import get_services
 
 
 class Updater:
-    def __init__(self, resolver: Image_Version_Resolver, snapshot_creation_tool: SnapshotCreationTool):
+    def __init__(self, resolver: Image_Version_Resolver, snapshot_creation_tool: SnapshotCreationTool | None):
         self.config = Config()
         self.resolver = resolver
         self.snapshot_creation_tool = snapshot_creation_tool
@@ -77,8 +77,8 @@ class Updater:
         return True
 
     def _cater_for_snapshot(self, service: Service) -> bool:
-        if self.config["SERVICE_SNAPSHOT"]:
-            log(f"Taking a snapshot of {service.path} using snapper..")
+        if self.snapshot_creation_tool is not None:
+            log(f"Taking a snapshot of {service.path} using {self.snapshot_creation_tool.name}..")
             try:
                 self.snapshot_creation_tool.create_snapshot(
                     service, message=f"Update container images {datetime.today()!s}"

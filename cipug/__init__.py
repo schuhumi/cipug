@@ -49,7 +49,13 @@ def main():
         # No arguments, default update behavior
         prune_images()
         resolver = Image_Version_Resolver()
-        snapshot_creation_tool: SnapshotCreationTool = snapshot_creation_tools.get_by_name(config["SNAPSHOT_TOOL"])()
+        snapshot_creation_tool: SnapshotCreationTool | None = None
+        if config["SERVICE_SNAPSHOT"]:
+            cls: type[SnapshotCreationTool] = snapshot_creation_tools.get_by_name(
+                config["SNAPSHOT_TOOL"]
+            )
+            cls.assert_dependencies()
+            snapshot_creation_tool = cls()
         updater = Updater(resolver=resolver, snapshot_creation_tool=snapshot_creation_tool)
         errors = updater.update_all_services()
         if errors:

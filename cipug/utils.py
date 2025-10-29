@@ -74,14 +74,6 @@ def check_dependencies():
             "and starting of services is disabled"
         )
 
-    if config["SERVICE_SNAPSHOT"]:
-        tools.append("snapper")
-    else:
-        log.vverbose(
-            "Skipping looking for snapper, as snapshotting of "
-            "services is disabled"
-        )
-
     for tool in tools:
         try:
             out = subprocess.check_output([tool, "--version"]).decode("utf-8").strip()

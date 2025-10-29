@@ -3,6 +3,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+from cipug import exit_code
 from cipug.log import log
 from cipug.service import Service
 
@@ -28,6 +29,22 @@ class Snapper(SnapshotCreationTool, SnapshotCheckTool):
             "configs"
         ]
         log.vverbose(f"Loaded snapper configs: \n{json.dumps(self.configs, indent=2)}")
+
+    @classmethod
+    def assert_dependencies(cls):
+        try:
+            out = subprocess.check_output([cls.name, "--version"], text=True).strip()
+            log.vverbose(f"Found tool: {out}")
+        except FileNotFoundError:
+            log.error(
+                f"Dependency {cls.name} not found",
+                exit_code=exit_code.DEPENDENCY_ERROR
+            )
+        except Exception as e:
+            log.error(
+                f"Found dependency {cls.name}, encountered error when calling it: {e}",
+                exit_code=exit_code.DEPENDENCY_ERROR
+            )
 
     def create_snapshot(self, service: Service, message: str):
         config_name = None
