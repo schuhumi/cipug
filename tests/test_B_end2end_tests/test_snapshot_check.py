@@ -7,7 +7,11 @@ from cipug.exit_code import SNAPSHOTS_NOK
 from cipug.service import Service
 from cipug.tools.snapshot import Snapper
 from tests.helper import call_cipug
-from tests.mock_tools import Snapper as SnapperMock
+from tests.mock_tools import (
+    Snapper as SnapperMock,
+    Skopeo as SkopeoMock,
+    PodmanDashCompose as PodmanDashComposeMock
+)
 from tests.mock_tools.environment import Environment
 
 
@@ -21,7 +25,7 @@ def test_snapshot_check():
     example_compose = service_example / "compose.yml"
 
     with Environment(
-        tools = [SnapperMock],
+        tools = [SnapperMock, SkopeoMock, PodmanDashComposeMock],
         env_overwrites = {
             "MOCK_TOOL_SNAPPER_ENV_CONF": str(service_example)  # Add our service example to the snapper mock tool
         },
@@ -32,15 +36,18 @@ def test_snapshot_check():
         # The testing .env with a random outdated hash
         example_env.write_text("")
 
+        cipug_env = {
+            "CIPUG_SERVICES_ROOT": test_services,
+            "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
+            "CIPUG_ENV_FILE_NAME": ".env",
+            "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots",
+            "CIPUG_COMPOSE_TOOL": "podman-compose"
+        }
+
 
         # Test 1: Check for snapper snapshots, althouth they don't exist yet
         cp: CompletedProcess[str] = call_cipug(
-            env={
-                "CIPUG_SERVICES_ROOT": test_services,
-                "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
-                "CIPUG_ENV_FILE_NAME": ".env",
-                "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots"
-            },
+            env=cipug_env,
             args=["--check-snapshots"]
         )
         print(cp.stdout)
@@ -51,12 +58,7 @@ def test_snapshot_check():
         snapper = Snapper()  # Use existing tooling to conveniently call (Mock-)snapper
         snapper.create_snapshot(service=Service(service_example), message="")
         cp = call_cipug(
-            env={
-                "CIPUG_SERVICES_ROOT": test_services,
-                "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
-                "CIPUG_ENV_FILE_NAME": ".env",
-                "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots"
-            },
+            env=cipug_env,
             args=["--check-snapshots"]
         )
         print(cp.stdout)
@@ -64,14 +66,9 @@ def test_snapshot_check():
         assert cp.returncode == 0
 
         # Test 3: Check for btrbk snapshots, althouth they don't exist yet
+        cipug_env["CIPUG_SNAPSHOTS_DIR_BTRBK"] = ".snap_btrbk"
         cp = call_cipug(
-            env={
-                "CIPUG_SERVICES_ROOT": test_services,
-                "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
-                "CIPUG_ENV_FILE_NAME": ".env",
-                "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots",
-                "CIPUG_SNAPSHOTS_DIR_BTRBK": ".snap_btrbk"
-            },
+            env=cipug_env,
             args=["--check-snapshots"]
         )
         print(cp.stdout)
@@ -84,13 +81,7 @@ def test_snapshot_check():
         now: str = datetime.now().strftime("%Y%m%dT%H%M")
         (service_example / ".snap_btrbk" / f"immich.{now}").mkdir(parents=True, exist_ok=True)
         cp = call_cipug(
-            env={
-                "CIPUG_SERVICES_ROOT": test_services,
-                "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
-                "CIPUG_ENV_FILE_NAME": ".env",
-                "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots",
-                "CIPUG_SNAPSHOTS_DIR_BTRBK": ".snap_btrbk"
-            },
+            env=cipug_env,
             args=["--check-snapshots"]
         )
         print(cp.stdout)
