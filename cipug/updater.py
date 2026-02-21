@@ -76,12 +76,16 @@ class Updater:
             return False
         return True
 
-    def _cater_for_snapshot(self, service: Service) -> bool:
+    def _cater_for_snapshot(self, service: Service, env: Env) -> bool:
         if self.snapshot_creation_tool is not None:
             log(f"Taking a snapshot of {service.path} using {self.snapshot_creation_tool.name}..")
             try:
+                # Try to get the hash for the service image
+                image_hash = env.get("_".join(["SERVICE", service.name, "IMAGE", "HASHED"]), None)
                 self.snapshot_creation_tool.create_snapshot(
-                    service, message=f"Update container images {datetime.today()!s}"
+                    service, 
+                    message=f"Update container images {datetime.today()!s}",
+                    image_hash=image_hash
                 )
             except Exception as e:
                 log.error(f'Cannot update service "{service.name}", because snapshotting failed: {e}')
@@ -169,7 +173,7 @@ class Updater:
         if not self._check_permission_compose_tool(service):
             return exit_code.TOOL_ERROR
 
-        if not self._cater_for_snapshot(service):
+        if not self._cater_for_snapshot(service, env):
             return exit_code.SNAPSHOT_ERROR
 
         if not self._cater_for_updating_env_file(env, service):

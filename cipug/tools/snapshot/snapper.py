@@ -46,7 +46,7 @@ class Snapper(SnapshotCreationTool, SnapshotCheckTool):
                 exit_code=exit_code.DEPENDENCY_ERROR
             )
 
-    def create_snapshot(self, service: Service, message: str):
+    def create_snapshot(self, service: Service, message: str, image_hash: str | None = None):
         config_name = None
         for each in self.configs:
             subvol = Path(each["subvolume"])
