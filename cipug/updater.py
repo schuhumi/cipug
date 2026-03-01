@@ -10,7 +10,7 @@ from .log import log
 from .resolver import Image_Version_Resolver
 from .service import Service
 from .tools.snapshot import SnapshotCreationTool
-from .utils import get_services
+from .utils import clean_image_hash, get_services
 
 
 class Updater:
@@ -81,11 +81,11 @@ class Updater:
             log(f"Taking a snapshot of {service.path} using {self.snapshot_creation_tool.name}..")
             try:
                 # Try to get the hash for the service image
-                image_hash = env.get("_".join(["SERVICE", service.name, "IMAGE", "HASHED"]), None)
+                image_hash = env.get("_".join(["SERVICE", service.name.upper(), "IMAGE", "HASHED"]), None)                
                 self.snapshot_creation_tool.create_snapshot(
                     service, 
                     message=f"Update container images {datetime.today()!s}",
-                    image_hash=image_hash
+                    image_hash=clean_image_hash(image_hash)
                 )
             except Exception as e:
                 log.error(f'Cannot update service "{service.name}", because snapshotting failed: {e}')

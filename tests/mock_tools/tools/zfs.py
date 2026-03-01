@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from tests.mock_tools.tools.base import Action, MockTool
@@ -29,20 +30,33 @@ class Zfs(MockTool):
                 # Mock listing snapshots
                 if "error_service" in dataset:
                      return Action(stderr=f"cannot open '{dataset}': dataset does not exist\n", returncode=1)
+
+                service_name = dataset.split("/")[-1]
                 
-                # timestamps in seconds
-                t1 = 1708527600 # 2024-02-21 15:00:00
-                t2 = 1708531200 # 2024-02-21 16:00:00
+                # Check if a snapshot was created during this test by looking for our mock file
+                conf_dir = os.environ.get("MOCK_TOOL_ZFS_ENV_CONF")
+                if conf_dir and Path(conf_dir).name == service_name:
+                    mock_file = Path(conf_dir) / ".mock_has_snapshots"
+                    if not mock_file.exists():
+                        return Action(stdout="")
+
+                import time
+                now = int(time.time())
+                t1 = now - 3600
+                t2 = now - 1800
                 
                 return Action(stdout=(
-                    f"{dataset}@cipug-2024-02-21-1500\t{t1}\n"
-                    f"{dataset}@cipug-2024-02-21-1600\t{t2}\n"
+                    f"{dataset}@cipug-mock-1\t{t1}\n"
+                    f"{dataset}@cipug-mock-2\t{t2}\n"
                     f"{dataset}@other-snapshot\t{t2}\n"
                 ))
 
             case ["snapshot", snapshot_name]:
                 # Mock creating snapshot
                 if "@" in snapshot_name:
+                    conf_dir = os.environ.get("MOCK_TOOL_ZFS_ENV_CONF")
+                    if conf_dir:
+                        (Path(conf_dir) / ".mock_has_snapshots").touch()
                     return Action()
                 else:
                     return Action(stderr="invalid snapshot name\n", returncode=1)

@@ -5,13 +5,15 @@ from tempfile import TemporaryDirectory
 
 from cipug.exit_code import SNAPSHOTS_NOK
 from cipug.service import Service
-from cipug.tools.snapshot import Snapper
+from cipug.tools.snapshot import Snapper, Zfs
 from tests.helper import call_cipug
 from tests.mock_tools import (
     Snapper as SnapperMock,
+    Zfs as ZfsMock,
     Skopeo as SkopeoMock,
     PodmanDashCompose as PodmanDashComposeMock
 )
+
 from tests.mock_tools.environment import Environment
 
 
@@ -87,3 +89,61 @@ def test_snapshot_check():
         print(cp.stdout)
         print(cp.stderr)
         assert cp.returncode == 0
+
+
+def test_snapshot_check_zfs():
+    """End2End test `cipug --check-snapshots` with ZFS"""
+    tmp_ctx = TemporaryDirectory()
+    tmp_path = Path(tmp_ctx.name)
+    test_services = tmp_path / "services"
+    service_example = test_services / "immich"
+    example_env = service_example / ".env"
+    example_compose = service_example / "compose.yml"
+
+    with Environment(
+        tools=[ZfsMock, SkopeoMock, PodmanDashComposeMock],
+        env_overwrites={
+            "MOCK_TOOL_ZFS_ENV_CONF": str(service_example)
+        },
+        tmp_ctx=tmp_ctx
+    ):
+        service_example.mkdir(parents=True)
+        example_compose.touch()
+        # The testing .env with a random outdated hash
+        example_env.write_text("")
+
+        cipug_env = {
+            "CIPUG_SERVICES_ROOT": test_services,
+            "CIPUG_COMPOSE_FILE_NAME": "compose.yml",
+            "CIPUG_ENV_FILE_NAME": ".env",
+            "CIPUG_COMPOSE_TOOL": "podman-compose",
+            "CIPUG_SNAPSHOTS_ENABLE_ZFS": "true"
+        }
+
+        # Test 1: Check for zfs snapshots, although they don't exist yet
+        cp = call_cipug(
+            env=cipug_env,
+            args=["--check-snapshots"]
+        )
+        assert cp.returncode == SNAPSHOTS_NOK.code
+        assert "Snapshots are missing or too old!" in cp.stderr
+        
+        # Test 2: Create zfs snapshots and check for their existence
+        zfs = Zfs()
+        zfs.create_snapshot(service=Service(service_example), message="")
+        cp = call_cipug(
+            env=cipug_env,
+            args=["--check-snapshots"]
+        )
+        assert cp.returncode == 0
+        assert "All required snapshots were found." in cp.stdout
+
+        # Test 3: Test with very strict age limit (1 sec), it should fail
+        cipug_env["CIPUG_SNAPSHOTS_MAX_AGE_ZFS"] = "0.001"
+        cp = call_cipug(
+            env=cipug_env,
+            args=["--check-snapshots"]
+        )
+        assert cp.returncode == SNAPSHOTS_NOK.code
+        assert "Snapshots are missing or too old!" in cp.stderr
+

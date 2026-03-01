@@ -50,8 +50,8 @@ def test_zfs_snapshot():
         assert snapshot_name.startswith("tank/services/immich@cipug-")
         
         # Test snapshot with image hash
-        image_hash_full = "sha256:1234567890abcdef1234567890abcdef"
-        tool.create_snapshot(service, "test message", image_hash=image_hash_full)
+        image_hash = "1234567890abcdef1234567890abcdef"
+        tool.create_snapshot(service, "test message", image_hash=image_hash)
         
         log = e.log
         assert len(log) == 5 # previous 3 + list + snapshot
@@ -63,8 +63,8 @@ def test_zfs_snapshot():
 
         # Test get_last_snapshot_date
         last_date = tool.get_last_snapshot_date(service)
-        # Mock returns 1708531200 for the latest cipug- snapshot
-        assert last_date == datetime.fromtimestamp(1708531200)
+        # Mock returns a timestamp from roughly 30 mins ago (1800s)
+        assert abs(last_date.timestamp() - (datetime.now().timestamp() - 1800)) < 10
 
         # Confirm it used the correct 'zfs list' commands
         log = e.log

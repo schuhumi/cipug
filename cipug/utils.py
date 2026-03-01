@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 import subprocess
 
 from . import exit_code
@@ -93,3 +94,17 @@ def prune_images():
             log.error(
                 f"Failed to prune images (returncode {ret})"
             )
+
+
+def clean_image_hash(image_hash: str | None) -> str | None:
+    if not image_hash:
+        return image_hash
+    # Digests usually look like 'name@sha256:hash'. Tags look like 'name:tag'.
+    # Splitting by ':' and taking the last part usually gives us exactly the hash or tag.
+    suffix_part = image_hash.split(":")[-1]
+    
+    # Clean up to ensure only alphanumeric characters (ZFS safe)
+    clean_hash = re.sub(r'[^a-zA-Z0-9]', '', suffix_part)
+    
+    return clean_hash
+

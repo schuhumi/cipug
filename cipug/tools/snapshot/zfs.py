@@ -13,6 +13,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
 
     name = "zfs"
     default_max_age = 1.5  # in hours
+    uses_directory = False
 
     @classmethod
     def assert_dependencies(cls):
@@ -47,9 +48,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
         snapshot_suffix = f"cipug-{timestamp}"
         
         if image_hash:
-            cleaned_hash = image_hash.removeprefix("sha256:")
-            short_hash = cleaned_hash[:12] if len(cleaned_hash) > 12 else cleaned_hash
-            snapshot_suffix += f"-{short_hash}"
+            snapshot_suffix += f"-{image_hash[:12]}"
             
         full_snapshot_name = f"{dataset}@{snapshot_suffix}"
         
@@ -67,7 +66,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
     def get_last_snapshot_date(self, service: Service) -> datetime | None:
         if not service.path.exists():
              return None
-
+        
         # Determine dataset for path
         try:
             dataset_cmd = ["zfs", "list", "-H", "-o", "name", str(service.path)]
