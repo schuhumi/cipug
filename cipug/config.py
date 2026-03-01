@@ -67,7 +67,8 @@ class Config(dict[str, Any]):
             "ENV_FILE_NAME": (".env", str),
             "CACHE_DURATION": (60 * 60, int),
             "CACHE_LOCATION": (Path(gettempdir()) / "cipug_cache.json", Path),
-            **{f"SNAPSHOTS_DIR_{t.name.upper()}": ("", str) for t in snapshot_check_tools.tools},
+            **{f"SNAPSHOTS_DIR_{t.name.upper()}": ("", str) for t in snapshot_check_tools.tools if getattr(t, "uses_directory", True)},
+            **{f"SNAPSHOTS_ENABLE_{t.name.upper()}": (False, Str2Bool) for t in snapshot_check_tools.tools if not getattr(t, "uses_directory", True)},
             **{f"SNAPSHOTS_MAX_AGE_{t.name.upper()}": (t.default_max_age, float) for t in snapshot_check_tools.tools},
             "CONFIG_FILE": ("", str),
         }

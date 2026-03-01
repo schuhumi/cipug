@@ -16,6 +16,7 @@ class SnapshotCheckTool(Tool, ABC):
     # Can be overridden with the SNAPSHOTS_MAX_AGE_XXX setting, where XXX is the
     # name attribute of this class in upper case.
     default_max_age: float  # in hours
+    uses_directory: bool = True
 
     @abstractmethod
     def get_last_snapshot_date(self, service: Service) -> datetime | None: ...
