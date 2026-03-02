@@ -13,8 +13,8 @@ from . import exit_code
 from .config import Config
 from .log import log
 from .resolver import Image_Version_Resolver
-from .snapper import Snapper
-from .snapshots import Snapshot_Checker
+from .snapshot_check import Snapshot_Checker
+from .tools.snapshot import SnapshotCreationTool, snapshot_creation_tools
 from .updater import Updater
 from .utils import check_dependencies, prune_images
 
@@ -49,8 +49,14 @@ def main():
         # No arguments, default update behavior
         prune_images()
         resolver = Image_Version_Resolver()
-        snapper = Snapper()
-        updater = Updater(resolver=resolver, snapper=snapper)
+        snapshot_creation_tool: SnapshotCreationTool | None = None
+        if config["SERVICE_SNAPSHOT"]:
+            cls: type[SnapshotCreationTool] = snapshot_creation_tools.get_by_name(
+                config["SNAPSHOT_TOOL"]
+            )
+            cls.assert_dependencies()
+            snapshot_creation_tool = cls()
+        updater = Updater(resolver=resolver, snapshot_creation_tool=snapshot_creation_tool)
         errors = updater.update_all_services()
         if errors:
             log.error("Encountered errors during updating!", exit_code=errors)

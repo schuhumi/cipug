@@ -1,14 +1,15 @@
 import glob
 import os
+import re
 import subprocess
-from pathlib import Path
 
 from . import exit_code
 from .config import Config
 from .log import log
+from .service import Service
 
 
-def get_services() -> list[Path]:
+def get_services() -> list[Service]:
     config = Config()
     if not config["SERVICES_ROOT"].is_dir():
         log.error(
@@ -22,7 +23,7 @@ def get_services() -> list[Path]:
         f"Searching for pattern \"{pattern}\" at {config['SERVICES_ROOT']}"
     )
 
-    services: list[Path] = []  # list of folders with a compose and env file
+    services: list[Service] = []  # list of folders with a compose and env file
     for result in glob.glob(
         pattern,
         root_dir=config["SERVICES_ROOT"]
@@ -34,20 +35,20 @@ def get_services() -> list[Path]:
                 f"Found {compose_file} but no {env_file}, skipping this folder"
             )
             continue
-        services.append(compose_file.parent)
+        services.append(Service(compose_file.parent))
 
     if config["SERVICES_FILTER"] != "":
         filter = config["SERVICES_FILTER"].split(",")
         log.verbose(f"Filtering services to be one of {filter}")
         services = [
-            entry for entry in services if entry.stem in filter
+            service for service in services if service.name in filter
         ]
 
     if config["SERVICES_FILTER_EXCLUDE"] != "":
         filter = config["SERVICES_FILTER_EXCLUDE"].split(",")
         log.verbose(f"Filtering services to not include any of {filter}")
         services = [
-            entry for entry in services if entry.stem not in filter
+            service for service in services if service.name not in filter
         ]
 
     if len(services)==1:
@@ -56,10 +57,9 @@ def get_services() -> list[Path]:
         log.verbose(f"Found {len(services)} services:")
     else:
         log.verbose("Did not find any services.")
-    for svc in services:
-        log.verbose(f" - {svc}")
+    for service in services:
+        log.verbose(f" - {service}")
     return services
-
 
 
 def check_dependencies():
@@ -73,14 +73,6 @@ def check_dependencies():
         log.vverbose(
             "Skipping looking for a compose tool, as stopping "
             "and starting of services is disabled"
-        )
-
-    if config["SERVICE_SNAPSHOT"]:
-        tools.append("snapper")
-    else:
-        log.vverbose(
-            "Skipping looking for snapper, as snapshotting of "
-            "services is disabled"
         )
 
     for tool in tools:
@@ -102,3 +94,17 @@ def prune_images():
             log.error(
                 f"Failed to prune images (returncode {ret})"
             )
+
+
+def clean_image_hash(image_hash: str | None) -> str | None:
+    if not image_hash:
+        return image_hash
+    # Digests usually look like 'name@sha256:hash'. Tags look like 'name:tag'.
+    # Splitting by ':' and taking the last part usually gives us exactly the hash or tag.
+    suffix_part = image_hash.split(":")[-1]
+    
+    # Clean up to ensure only alphanumeric characters (ZFS safe)
+    clean_hash = re.sub(r'[^a-zA-Z0-9]', '', suffix_part)
+    
+    return clean_hash
+

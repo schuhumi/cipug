@@ -6,6 +6,8 @@ from tests.mock_tools.tools.base import Action, MockTool
 class Compose(MockTool, ABC):
     def run(self, argv: list[str]) -> Action:
         match argv[1:]:
+            case ["--version"]:
+                return Action(stdout=f"{self.name} version 1.5.0\n")
             case ["ps"]:
                 return Action()
             case ["pull"]:
@@ -22,7 +24,7 @@ class DockerDashCompose(Compose):
     name = "docker-compose"
 
 class PodmanDashCompose(Compose):
-    name = "docker-compose"
+    name = "podman-compose"
 
 class NoDashCompose(Compose, ABC):
     # docker and podman

@@ -5,8 +5,10 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
+from typing import Any
 
 import tests
+from cipug.config import Config
 from tests.mock_tools.tools.base import Action, MockTool, logfile_env
 
 
@@ -34,6 +36,7 @@ class Environment:
     env_overwrites_backup: dict[str, str | None]
     tmp_ctx: tempfile.TemporaryDirectory[str]
     logfile_path: Path
+    config_backup: dict[str, Any]
 
     def __init__(
         self,
@@ -45,6 +48,7 @@ class Environment:
         self.env_overwrites = env_overwrites or {}
         self.tmp_ctx = tmp_ctx or tempfile.TemporaryDirectory()
         self.logfile_path = Path(self.path).resolve() / "tools_log.jsonl"
+        self.config = Config()
 
     def __enter__(self):
         self.tmp_ctx.__enter__()
@@ -84,6 +88,12 @@ class Environment:
             )
         os.environ[logfile_env] = str(self.logfile_path)
         os.putenv(logfile_env, os.environ[logfile_env])
+
+        # Since environment variables can change the config, we need to reload it.
+        # We keep a backup that gets restored when exiting the environment.
+        self.config_backup = self.config.copy()
+        self.config.reload()
+
         return self
 
     def __exit__(
@@ -103,6 +113,8 @@ class Environment:
             else:
                 os.environ[key] = val
                 os.putenv(key, val)
+        self.config.clear()
+        self.config.update(self.config_backup)
         self.tmp_ctx.__exit__(exc_type, exc_val, exc_tb)
 
     @property
