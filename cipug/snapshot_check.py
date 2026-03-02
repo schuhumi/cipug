@@ -34,9 +34,8 @@ class Snapshot_Checker:
                 if getattr(tool, "uses_directory", True):
                     if not self.config[f"SNAPSHOTS_DIR_{tool.name.upper()}"]:
                         continue
-                else:
-                    if not self.config[f"SNAPSHOTS_ENABLE_{tool.name.upper()}"]:
-                        continue
+                elif not self.config[f"SNAPSHOTS_ENABLE_{tool.name.upper()}"]:
+                    continue
                 date: datetime | None = tool().get_last_snapshot_date(service)
                 max_age: float = self.config[f"SNAPSHOTS_MAX_AGE_{tool.name.upper()}"]
 

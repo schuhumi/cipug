@@ -7,13 +7,10 @@ from cipug.exit_code import SNAPSHOTS_NOK
 from cipug.service import Service
 from cipug.tools.snapshot import Snapper, Zfs
 from tests.helper import call_cipug
-from tests.mock_tools import (
-    Snapper as SnapperMock,
-    Zfs as ZfsMock,
-    Skopeo as SkopeoMock,
-    PodmanDashCompose as PodmanDashComposeMock
-)
-
+from tests.mock_tools import PodmanDashCompose as PodmanDashComposeMock
+from tests.mock_tools import Skopeo as SkopeoMock
+from tests.mock_tools import Snapper as SnapperMock
+from tests.mock_tools import Zfs as ZfsMock
 from tests.mock_tools.environment import Environment
 
 
@@ -29,7 +26,9 @@ def test_snapshot_check():
     with Environment(
         tools = [SnapperMock, SkopeoMock, PodmanDashComposeMock],
         env_overwrites = {
-            "MOCK_TOOL_SNAPPER_ENV_CONF": str(service_example)  # Add our service example to the snapper mock tool
+            "MOCK_TOOL_SNAPPER_ENV_CONF": str(service_example),  # Add our service example to the snapper mock tool
+            # Set this here already, so that Config() works outside of the cipug call also
+            "CIPUG_SERVICES_ROOT": str(test_services),
         },
         tmp_ctx = tmp_ctx  # reuse the temporary directory for the environment
     ):
@@ -103,7 +102,9 @@ def test_snapshot_check_zfs():
     with Environment(
         tools=[ZfsMock, SkopeoMock, PodmanDashComposeMock],
         env_overwrites={
-            "MOCK_TOOL_ZFS_ENV_CONF": str(service_example)
+            "MOCK_TOOL_ZFS_ENV_CONF": str(service_example),
+            # Set this here already, so that Config() works outside of the cipug call also
+            "CIPUG_SERVICES_ROOT": str(test_services),
         },
         tmp_ctx=tmp_ctx
     ):
@@ -127,7 +128,7 @@ def test_snapshot_check_zfs():
         )
         assert cp.returncode == SNAPSHOTS_NOK.code
         assert "Snapshots are missing or too old!" in cp.stderr
-        
+
         # Test 2: Create zfs snapshots and check for their existence
         zfs = Zfs()
         zfs.create_snapshot(service=Service(service_example), message="")
@@ -146,4 +147,3 @@ def test_snapshot_check_zfs():
         )
         assert cp.returncode == SNAPSHOTS_NOK.code
         assert "Snapshots are missing or too old!" in cp.stderr
-

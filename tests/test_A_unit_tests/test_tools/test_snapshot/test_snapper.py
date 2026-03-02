@@ -25,7 +25,8 @@ def test_snapper():
         tools=[SnapperMock],
         env_overwrites={
             "MOCK_TOOL_SNAPPER_ENV_CONF": str(service_example),  # Add our service example to the snapper mock tool
-            "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots"  # for testing snapper.get_last_snapshot_date()
+            "CIPUG_SNAPSHOTS_DIR_SNAPPER": ".snapshots",  # for testing snapper.get_last_snapshot_date()
+            "CIPUG_SERVICES_ROOT": str(tmp_path),  # Not needed for the test, but Config() checks for it
         },
         tmp_ctx=tmp_ctx,  # reuse the temporary directory for the environment
     ) as e:

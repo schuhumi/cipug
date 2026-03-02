@@ -1,12 +1,12 @@
 import subprocess
 from datetime import datetime
-from pathlib import Path
 
 from cipug import exit_code
 from cipug.log import log
 from cipug.service import Service
 
 from .base import SnapshotCheckTool, SnapshotCreationTool
+
 
 class Zfs(SnapshotCreationTool, SnapshotCheckTool):
     """Snapshot creation and check tool for ZFS."""
@@ -46,16 +46,16 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
 
         timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")
         snapshot_suffix = f"cipug-{timestamp}"
-        
+
         if image_hash:
             snapshot_suffix += f"-{image_hash[:12]}"
-            
+
         full_snapshot_name = f"{dataset}@{snapshot_suffix}"
-        
+
         log(f"Creating ZFS snapshot {full_snapshot_name}...")
-        
+
         cmd = ["zfs", "snapshot", full_snapshot_name]
-        
+
         completed_process = subprocess.run(cmd, check=False, capture_output=True, text=True)
         if completed_process.returncode != 0:
              raise Exception(
@@ -66,7 +66,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
     def get_last_snapshot_date(self, service: Service) -> datetime | None:
         if not service.path.exists():
              return None
-        
+
         # Determine dataset for path
         try:
             dataset_cmd = ["zfs", "list", "-H", "-o", "name", str(service.path)]

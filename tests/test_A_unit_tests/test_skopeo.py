@@ -17,7 +17,8 @@ def test_skopeo():
         tools = [SkopeoMock],
         env_overwrites = {
             "CIPUG_CACHE_LOCATION": str(test_cache.resolve()),
-            "CIPUG_CACHE_DURATION": str(3600)
+            "CIPUG_CACHE_DURATION": str(3600),
+            "CIPUG_SERVICES_ROOT": str(tmp_path),  # Not needed for the test, but Config() checks for it
         },
         tmp_ctx = tmp_ctx  # reuse the temporary directory for the environment
     ) as e:

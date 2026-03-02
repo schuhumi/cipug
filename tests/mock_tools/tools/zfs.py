@@ -21,7 +21,7 @@ class Zfs(MockTool):
                 # Allow any path, just derive a dataset name
                 if "error_service" in path:
                      return Action(stderr=f"cannot open '{path}': dataset does not exist\n", returncode=1)
-                
+
                 # Derive dataset name from path for valid cases
                 # e.g. /tmp/xyz/services/fake_service -> tank/services/fake_service
                 service_name = Path(path).name
@@ -32,7 +32,7 @@ class Zfs(MockTool):
                      return Action(stderr=f"cannot open '{dataset}': dataset does not exist\n", returncode=1)
 
                 service_name = dataset.split("/")[-1]
-                
+
                 # Check if a snapshot was created during this test by looking for our mock file
                 conf_dir = os.environ.get("MOCK_TOOL_ZFS_ENV_CONF")
                 if conf_dir and Path(conf_dir).name == service_name:
@@ -44,7 +44,7 @@ class Zfs(MockTool):
                 now = int(time.time())
                 t1 = now - 3600
                 t2 = now - 1800
-                
+
                 return Action(stdout=(
                     f"{dataset}@cipug-mock-1\t{t1}\n"
                     f"{dataset}@cipug-mock-2\t{t2}\n"

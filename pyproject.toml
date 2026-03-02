@@ -16,7 +16,8 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest"]
-lint = ["basedpyright", "ruff"]
+lint = ["ruff"]
+type = ["basedpyright"]
 
 [project.urls]
 Repository = "https://github.com/schuhumi/cipug.git"
@@ -60,5 +61,4 @@ ignore = [
     "PLR0913", # too many arguments to function call
     "PLR2004", # magic value used in comparison, consider replacing it with a constant variable
     "PLW2901", # loop variable overwritten by assignment target
-    "RUF100", # Unused noqa directive
 ]

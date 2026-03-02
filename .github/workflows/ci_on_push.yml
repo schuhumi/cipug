@@ -1,0 +1,50 @@
+name: pytest
+
+on: [push]
+
+jobs:
+
+  lint_types:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv and set the Python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Install the whole project
+        run: make install
+
+      - name: Run linter
+        run: make lint
+
+      - name: Run typechecker
+        run: make types
+
+
+  test:
+    runs-on: ubuntu-slim
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv and set the Python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --extra test
+
+      - name: Run tests
+        run: make tests
