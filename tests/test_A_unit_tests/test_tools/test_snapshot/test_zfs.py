@@ -64,6 +64,7 @@ def test_zfs_snapshot():
 
         # Test get_last_snapshot_date
         last_date = tool.get_last_snapshot_date(service)
+        assert last_date is not None
         # Mock returns a timestamp from roughly 30 mins ago (1800s)
         assert abs(last_date.timestamp() - (datetime.now().timestamp() - 1800)) < 10
 
