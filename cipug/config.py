@@ -4,7 +4,7 @@ from collections.abc import Callable
 from pathlib import Path
 from tempfile import gettempdir
 from types import MappingProxyType
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Self, TypeVar
 
 from . import exit_code
 from .log import log
@@ -48,7 +48,7 @@ class Config(dict[str, Any]):
     """Get config for cipug from environment variables. This has
     nothing to do with the .env file for compose."""
 
-    _instance = None
+    instance: Self | None = None
     settings_schema: MappingProxyType[str, tuple[Any, Callable[[Any], Any]]] = MappingProxyType(
         {
             "VERBOSITY": (1, int),
@@ -75,10 +75,10 @@ class Config(dict[str, Any]):
     )
 
     def __new__(cls, *args, **kwargs):  # type: ignore
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            super(Config, cls._instance).__init__(*args, **kwargs)
-        return cls._instance
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+            super(Config, cls.instance).__init__(*args, **kwargs)
+        return cls.instance
 
     def _load_config_file(self):
         if self["CONFIG_FILE"] != "":

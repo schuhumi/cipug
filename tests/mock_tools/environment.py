@@ -36,7 +36,7 @@ class Environment:
     env_overwrites_backup: dict[str, str | None]
     tmp_ctx: tempfile.TemporaryDirectory[str]
     logfile_path: Path
-    config_backup: dict[str, Any]
+    config_existed: bool
 
     def __init__(
         self,
@@ -48,7 +48,7 @@ class Environment:
         self.env_overwrites = env_overwrites or {}
         self.tmp_ctx = tmp_ctx or tempfile.TemporaryDirectory()
         self.logfile_path = Path(self.path).resolve() / "tools_log.jsonl"
-        self.config = Config()
+        self.config_existed = Config.instance is not None
 
     def __enter__(self):
         self.tmp_ctx.__enter__()
@@ -89,10 +89,12 @@ class Environment:
         os.environ[logfile_env] = str(self.logfile_path)
         os.putenv(logfile_env, os.environ[logfile_env])
 
-        # Since environment variables can change the config, we need to reload it.
-        # We keep a backup that gets restored when exiting the environment.
-        self.config_backup = self.config.copy()
-        self.config.reload()
+        # Since environment variables can change the config, we need to reload it (if it exists)
+        if Config.instance is None:
+            self.config_existed = False
+        else:
+            self.config_existed = True
+            Config.instance.reload()
 
         return self
 
@@ -113,8 +115,12 @@ class Environment:
             else:
                 os.environ[key] = val
                 os.putenv(key, val)
-        self.config.clear()
-        self.config.update(self.config_backup)
+        # Restore config to the state as it was before __enter__
+        if self.config_existed:
+            if Config.instance is not None:
+                Config.instance.reload()
+        else:
+            Config.instance = None
         self.tmp_ctx.__exit__(exc_type, exc_val, exc_tb)
 
     @property
