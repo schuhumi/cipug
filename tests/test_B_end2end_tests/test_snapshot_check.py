@@ -7,13 +7,10 @@ from cipug.exit_code import SNAPSHOTS_NOK
 from cipug.service import Service
 from cipug.tools.snapshot import Snapper, Zfs
 from tests.helper import call_cipug
-from tests.mock_tools import (
-    Snapper as SnapperMock,
-    Zfs as ZfsMock,
-    Skopeo as SkopeoMock,
-    PodmanDashCompose as PodmanDashComposeMock
-)
-
+from tests.mock_tools import PodmanDashCompose as PodmanDashComposeMock
+from tests.mock_tools import Skopeo as SkopeoMock
+from tests.mock_tools import Snapper as SnapperMock
+from tests.mock_tools import Zfs as ZfsMock
 from tests.mock_tools.environment import Environment
 
 

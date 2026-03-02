@@ -5,7 +5,6 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Any
 
 import tests
 from cipug.config import Config

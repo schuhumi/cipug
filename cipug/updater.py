@@ -81,9 +81,9 @@ class Updater:
             log(f"Taking a snapshot of {service.path} using {self.snapshot_creation_tool.name}..")
             try:
                 # Try to get the hash for the service image
-                image_hash = env.get("_".join(["SERVICE", service.name.upper(), "IMAGE", "HASHED"]), None)                
+                image_hash = env.get("_".join(["SERVICE", service.name.upper(), "IMAGE", "HASHED"]), None)
                 self.snapshot_creation_tool.create_snapshot(
-                    service, 
+                    service,
                     message=f"Update container images {datetime.today()!s}",
                     image_hash=clean_image_hash(image_hash)
                 )
