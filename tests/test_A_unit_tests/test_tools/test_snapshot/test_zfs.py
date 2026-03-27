@@ -34,7 +34,7 @@ def test_zfs_snapshot():
 
         # Test snapshot creation
         service = Service(service_example)
-        tool.create_snapshot(service, "test message")
+        tool.create_snapshot(service)
 
         log = e.log
         assert len(log) == 3 # previous 1 + list + snapshot
@@ -67,7 +67,7 @@ def test_zfs_snapshot():
 
         # Test failure: Path does not exist
         with pytest.raises(Exception) as excinfo:
-             tool.create_snapshot(Service(Path("/non/existent/path")), "msg")
+             tool.create_snapshot(Service(Path("/non/existent/path")))
         assert "does not exist" in str(excinfo.value)
 
 
@@ -82,5 +82,5 @@ def test_zfs_snapshot():
         error_path.mkdir()
         # Mock Zfs tool returns error for unknown paths in 'list' command
         with pytest.raises(Exception) as excinfo:
-            tool.create_snapshot(Service(error_path), "msg")
+            tool.create_snapshot(Service(error_path))
         assert "Could not determine ZFS dataset" in str(excinfo.value)

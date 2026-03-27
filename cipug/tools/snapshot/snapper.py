@@ -46,7 +46,7 @@ class Snapper(SnapshotCreationTool, SnapshotCheckTool):
                 exit_code=exit_code.DEPENDENCY_ERROR
             )
 
-    def create_snapshot(self, service: Service, message: str):
+    def create_snapshot(self, service: Service):
         config_name = None
         for each in self.configs:
             subvol = Path(each["subvolume"])
@@ -57,6 +57,7 @@ class Snapper(SnapshotCreationTool, SnapshotCheckTool):
         if config_name is None:
             raise KeyError(f"No snapper config found for folder {service.path}")
 
+        message = f"Update container images {datetime.today()!s}"
         completed_process = subprocess.run(
             ["snapper", "-c", config_name, "create", "--description", message], check=False
         )

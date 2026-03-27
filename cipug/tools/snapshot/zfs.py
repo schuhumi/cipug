@@ -32,7 +32,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
                 exit_code=exit_code.DEPENDENCY_ERROR
             )
 
-    def create_snapshot(self, service: Service, message: str):
+    def create_snapshot(self, service: Service):
         if not service.path.exists():
              raise FileNotFoundError(f"Service path {service.path} does not exist")
 

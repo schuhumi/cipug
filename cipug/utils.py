@@ -93,7 +93,3 @@ def prune_images():
             log.error(
                 f"Failed to prune images (returncode {ret})"
             )
-
-
-
-

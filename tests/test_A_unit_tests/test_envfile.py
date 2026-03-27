@@ -1,7 +1,7 @@
 import tempfile
 from pathlib import Path
 
-from cipug.env import Env
+from cipug.tools.version_modifier.env import EnvFile
 
 
 def test_load_parse_store():
@@ -22,7 +22,7 @@ VALUE_WITH_WHITESPACE= <- there
 CONFUSING=there_is_\
 another_=_in_here!
 """)
-        env = Env(env_file)
+        env = EnvFile(env_file)
         assert env["A_VALUE"] == "hello"
         assert env["ANOTHER"] == "world"
         assert env["MULTI_LINE"] == "can have line breaks"
