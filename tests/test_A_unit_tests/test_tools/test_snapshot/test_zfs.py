@@ -6,6 +6,8 @@ import pytest
 
 from cipug.service import Service
 from cipug.tools.snapshot.zfs import Zfs
+from cipug.tools.version_modifier import ContainerVersion
+from tests.helper import VersionModifierPlaceholder
 from tests.mock_tools import Zfs as ZfsMock
 from tests.mock_tools.environment import Environment, LogEntry
 
@@ -34,7 +36,7 @@ def test_zfs_snapshot():
 
         # Test snapshot creation
         service = Service(service_example)
-        tool.create_snapshot(service, "test message")
+        tool.create_snapshot(service, None)
 
         log = e.log
         assert len(log) == 3 # previous 1 + list + snapshot
@@ -51,8 +53,19 @@ def test_zfs_snapshot():
         assert snapshot_name.startswith("tank/services/immich@cipug-")
 
         # Test snapshot with image hash
-        image_hash = "1234567890abcdef1234567890abcdef"
-        tool.create_snapshot(service, "test message", image_hash=image_hash)
+        vmt = VersionModifierPlaceholder(svc=service, resolver=None)
+        vmt.container_versions.append(
+            ContainerVersion(
+                resolver=None,
+                name="IMMICH",
+                image="ghcr.io/immich-app/immich-server",
+                tag="v2",
+                hash_current="1234567890abcdef1234567890abcdef",
+                _hash_next=None,
+            )
+        )
+
+        tool.create_snapshot(service, vmt)
 
         log = e.log
         assert len(log) == 5 # previous 3 + list + snapshot
@@ -79,7 +92,7 @@ def test_zfs_snapshot():
 
         # Test failure: Path does not exist
         with pytest.raises(Exception) as excinfo:
-             tool.create_snapshot(Service(Path("/non/existent/path")), "msg")
+             tool.create_snapshot(Service(Path("/non/existent/path")), None)
         assert "does not exist" in str(excinfo.value)
 
 
@@ -94,5 +107,5 @@ def test_zfs_snapshot():
         error_path.mkdir()
         # Mock Zfs tool returns error for unknown paths in 'list' command
         with pytest.raises(Exception) as excinfo:
-            tool.create_snapshot(Service(error_path), "msg")
+            tool.create_snapshot(Service(error_path), None)
         assert "Could not determine ZFS dataset" in str(excinfo.value)

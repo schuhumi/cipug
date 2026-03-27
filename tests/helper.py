@@ -4,6 +4,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from cipug.resolver import Image_Version_Resolver
+from cipug.service import Service
+from cipug.tools.version_modifier import VersionModifierTool
+
 
 def clean_env() -> dict[str, str]:
     # Remove any existing cipug specific environment variables to not mess with the tests
@@ -34,3 +38,20 @@ def call_cipug(
         capture_output=True,
         text=True
     )
+
+class VersionModifierPlaceholder(VersionModifierTool):
+    @classmethod
+    def assert_dependencies(cls):
+        return
+
+    def __init__(
+        self,
+        svc: Service,
+        resolver: Image_Version_Resolver | None,
+    ) -> None:
+        self.svc = svc
+        self.resolver = resolver
+        self.container_versions = []
+
+    def _store_next_hashes(self) -> None:
+        pass

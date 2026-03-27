@@ -46,7 +46,7 @@ def test_snapper():
         # We now simulate snapshotting a folder with the mockup snapper command line tool
         # (for the path value see tests/mock_tools/tools/snapper.py)
         t_before_snapshot = datetime.now()
-        snapper.create_snapshot(service, "testmessage")
+        snapper.create_snapshot(service, None)
         t_after_snapshot = datetime.now()
 
         log = e.log
@@ -54,12 +54,11 @@ def test_snapper():
         entry = log[1]
         assert entry.name == "snapper"
         assert entry.action.returncode == 0
-        assert entry.argv[1:] == [
+        assert entry.argv[1:-1] == [
             "-c",
             "envconf",
             "create",
             "--description",
-            "testmessage",
         ]
 
         # Test if retrieving the snapshot datetime works correctly
@@ -69,4 +68,4 @@ def test_snapper():
 
         # Simulate snapshotting something that doesn't exist
         with pytest.raises(Exception):
-            snapper.create_snapshot(Service(Path("/this/does/not/exist")), "testmessage")
+            snapper.create_snapshot(Service(Path("/this/does/not/exist")), None)

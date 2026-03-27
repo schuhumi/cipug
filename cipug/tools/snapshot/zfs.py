@@ -1,11 +1,28 @@
+import re
 import subprocess
 from datetime import datetime
+from typing import TYPE_CHECKING, overload
 
 from cipug import exit_code
 from cipug.log import log
 from cipug.service import Service
 
 from .base import SnapshotCheckTool, SnapshotCreationTool
+
+if TYPE_CHECKING:
+    from cipug.tools.version_modifier import VersionModifierTool
+
+
+@overload
+def alphanumeric(s: None) -> None: ...
+@overload
+def alphanumeric(s: str) -> str: ...
+
+def alphanumeric(s: str | None) -> str | None:
+    if s is None:
+        return None
+    return re.sub(r'[^a-zA-Z0-9]', '', s)
+
 
 
 class Zfs(SnapshotCreationTool, SnapshotCheckTool):
@@ -32,7 +49,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
                 exit_code=exit_code.DEPENDENCY_ERROR
             )
 
-    def create_snapshot(self, service: Service, message: str, image_hash: str | None = None):
+    def create_snapshot(self, service: Service, vmt: "VersionModifierTool | None"):
         if not service.path.exists():
              raise FileNotFoundError(f"Service path {service.path} does not exist")
 
@@ -47,8 +64,13 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
         timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")
         snapshot_suffix = f"cipug-{timestamp}"
 
-        if image_hash:
-            snapshot_suffix += f"-{image_hash[:12]}"
+        # Try to get the hash for the service image
+        if vmt is not None:
+            main_cont_version = vmt.get_container_version(service.name, case_sensitive=False)
+            if main_cont_version is not None:
+                image_hash = alphanumeric(main_cont_version.hash_current)
+                if image_hash:
+                    snapshot_suffix += f"-{image_hash[:12]}"
 
         full_snapshot_name = f"{dataset}@{snapshot_suffix}"
 

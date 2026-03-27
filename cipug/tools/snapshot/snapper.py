@@ -2,10 +2,14 @@ import json
 import subprocess
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cipug import exit_code
 from cipug.log import log
 from cipug.service import Service
+
+if TYPE_CHECKING:
+    from cipug.tools.version_modifier import VersionModifierTool
 
 from .base import SnapshotCheckTool, SnapshotCreationTool
 
@@ -46,7 +50,7 @@ class Snapper(SnapshotCreationTool, SnapshotCheckTool):
                 exit_code=exit_code.DEPENDENCY_ERROR
             )
 
-    def create_snapshot(self, service: Service, message: str, image_hash: str | None = None):
+    def create_snapshot(self, service: Service, vmt: "VersionModifierTool | None"):
         config_name = None
         for each in self.configs:
             subvol = Path(each["subvolume"])
@@ -57,6 +61,7 @@ class Snapper(SnapshotCreationTool, SnapshotCheckTool):
         if config_name is None:
             raise KeyError(f"No snapper config found for folder {service.path}")
 
+        message = f"Update container images {datetime.today()!s}"
         completed_process = subprocess.run(
             ["snapper", "-c", config_name, "create", "--description", message], check=False
         )

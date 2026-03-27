@@ -57,7 +57,7 @@ def test_snapshot_check():
 
         # Test 2: Create snapper snapshots and check for their existence
         snapper = Snapper()  # Use existing tooling to conveniently call (Mock-)snapper
-        snapper.create_snapshot(service=Service(service_example), message="")
+        snapper.create_snapshot(service=Service(service_example), vmt=None)
         cp = call_cipug(
             env=cipug_env,
             args=["--check-snapshots"]
@@ -131,7 +131,7 @@ def test_snapshot_check_zfs():
 
         # Test 2: Create zfs snapshots and check for their existence
         zfs = Zfs()
-        zfs.create_snapshot(service=Service(service_example), message="")
+        zfs.create_snapshot(service=Service(service_example), vmt=None)
         cp = call_cipug(
             env=cipug_env,
             args=["--check-snapshots"]

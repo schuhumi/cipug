@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from cipug.service import Service
 from cipug.tools import Tool
 
+if TYPE_CHECKING:
+    from cipug.tools.version_modifier import VersionModifierTool
+
 
 class SnapshotCreationTool(Tool, ABC):
     @abstractmethod
-    def create_snapshot(self, service: Service, message: str, image_hash: str | None = None): ...
+    def create_snapshot(self, service: Service, vmt: "VersionModifierTool | None"): ...
 
 
 class SnapshotCheckTool(Tool, ABC):

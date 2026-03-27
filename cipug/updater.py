@@ -1,16 +1,13 @@
-import re
 import subprocess
-from datetime import datetime
 
 from . import exit_code
-from .colors import colors
 from .config import Config
-from .env import Env
 from .log import log
 from .resolver import Image_Version_Resolver
 from .service import Service
 from .tools.snapshot import SnapshotCreationTool
-from .utils import clean_image_hash, get_services
+from .tools.version_modifier import Env, VersionModifierTool
+from .utils import get_services
 
 
 class Updater:
@@ -19,47 +16,6 @@ class Updater:
         self.resolver = resolver
         self.snapshot_creation_tool = snapshot_creation_tool
         self.services: list[Service] = get_services()
-
-    def _update_image_hashes(self, env: Env):
-        for key in list(env.keys()):  # Dict size will change, hence copy env.keys into a list
-            if key.startswith("SERVICE_") and key.endswith("_IMAGE_TAGGED"):
-                entry_name = key.removeprefix("SERVICE_").removesuffix("_IMAGE_TAGGED")
-                image_tagged = env[key]
-
-                # Check for environment variables in the tagged image (${VAR} format)
-                def replace_env_vars(s: str, vars: dict[str, str]):
-                    def replace_var(match: re.Match[str]) -> str:
-                        var_name: str = match.group(1)
-                        fallback: str = match.group(0)
-                        return vars.get(var_name, fallback)
-
-                    pattern = r"\${([A-Za-z0-9_]+)}"
-                    return re.sub(pattern, replace_var, s)
-
-                # Apply environment variable substitution
-                interpolated_image = replace_env_vars(image_tagged, env)
-                if interpolated_image != image_tagged:
-                    log.verbose(f"Interpolated image name: {image_tagged} → {interpolated_image}")
-                    image_tagged = interpolated_image
-
-                log.verbose(f'Found tagged image entry for "{entry_name}": {image_tagged}')
-
-                current_hash = env.get("_".join(["SERVICE", entry_name, "IMAGE", "HASHED"]), None)
-                if current_hash is None:
-                    log.verbose(
-                        f'There\'s no hashed image reference for "{entry_name}"'
-                        f" in {self.config['ENV_FILE_NAME']} currently"
-                    )
-                else:
-                    log.verbose(f'The current hashed image reference for "{entry_name}" is: {current_hash}')
-
-                new_hash = self.resolver.resolve_image_version(image_tagged)
-
-                if new_hash == current_hash:
-                    log(f"{entry_name}: {image_tagged} stays at {current_hash}")
-                else:
-                    env["_".join(["SERVICE", entry_name, "IMAGE", "HASHED"])] = new_hash
-                    log(f"{colors.Green}{entry_name}: {image_tagged} is now at {new_hash}{colors.Reset}")
 
     def _check_permission_compose_tool(self, service: Service) -> bool:
         log(f'Ensuring permission for "{self.config["COMPOSE_TOOL"]}"..')
@@ -76,28 +32,22 @@ class Updater:
             return False
         return True
 
-    def _cater_for_snapshot(self, service: Service, env: Env) -> bool:
+    def _cater_for_snapshot(self, service: Service, vmt: VersionModifierTool) -> bool:
         if self.snapshot_creation_tool is not None:
             log(f"Taking a snapshot of {service.path} using {self.snapshot_creation_tool.name}..")
             try:
-                # Try to get the hash for the service image
-                image_hash = env.get("_".join(["SERVICE", service.name.upper(), "IMAGE", "HASHED"]), None)
-                self.snapshot_creation_tool.create_snapshot(
-                    service,
-                    message=f"Update container images {datetime.today()!s}",
-                    image_hash=clean_image_hash(image_hash)
-                )
+                self.snapshot_creation_tool.create_snapshot(service, vmt)
             except Exception as e:
                 log.error(f'Cannot update service "{service.name}", because snapshotting failed: {e}')
                 return False
         return True
 
-    def _cater_for_updating_env_file(self, env: Env, service: Service) -> bool:
-        log(f"Writing updated {env.path} configuration..")
+    def _cater_for_updating_cnt_pin(self, service: Service, vmt: VersionModifierTool) -> bool:
+        log("Writing updated hashes for container pinning..")
         try:
-            env.write()
+            vmt.write_hashes()
         except Exception as e:
-            log.error(f'Cannot update service "{service.name}", because writing .env file failed: {e}')
+            log.error(f'Cannot update service "{service.name}", because writing hashes file failed: {e}')
             return False
         return True
 
@@ -151,20 +101,9 @@ class Updater:
     def update_service(self, service: Service) -> exit_code.Exit_Code | None:
         log(f'Working on service "{service.name}"', highlight=True)
 
-        env_file = service.path / self.config["ENV_FILE_NAME"]
-        if not env_file.is_file():
-            log.error(f"File {env_file} not found, cannot update service.")
-            return exit_code.FILE_NOT_FOUND
-        env = Env(env_file)
+        vmt: VersionModifierTool = Env(service, self.resolver)  # Version Modifier Tool
 
-        log.vverbose(
-            f"Searching {self.config['ENV_FILE_NAME']} for SERVICE_*_IMAGE_TAGGED "
-            "entries that should get resolved to SERVICE_*_IMAGE_HASHED entries."
-        )
-
-        self._update_image_hashes(env)
-
-        if env.has_changes():
+        if vmt.has_updates(logging=True):
             log(f'Changes pending for "{service.name}"')
         else:
             log(f'No changes for "{service.name}", done.')
@@ -173,10 +112,10 @@ class Updater:
         if not self._check_permission_compose_tool(service):
             return exit_code.TOOL_ERROR
 
-        if not self._cater_for_snapshot(service, env):
+        if not self._cater_for_snapshot(service, vmt):
             return exit_code.SNAPSHOT_ERROR
 
-        if not self._cater_for_updating_env_file(env, service):
+        if not self._cater_for_updating_cnt_pin(service, vmt):
             return exit_code.ENV_ERROR
 
         if not self._cater_for_image_pull(service):
