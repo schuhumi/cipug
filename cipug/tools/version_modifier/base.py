@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pathlib import Path
 
 from cipug.colors import colors
 from cipug.log import log
@@ -85,6 +86,11 @@ class ContainerVersion:
 
 class VersionModifierTool(Tool, ABC):
     container_versions: list[ContainerVersion]
+
+    @classmethod
+    @abstractmethod
+    def check_if_folder_is_service(cls, path: Path) -> bool:
+        ...
 
     @abstractmethod
     def __init__(

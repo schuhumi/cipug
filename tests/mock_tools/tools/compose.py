@@ -36,6 +36,8 @@ class NoDashCompose(Compose, ABC):
                 return Action()
             case ["compose", *_]:
                 return super().run(argv[1:])
+            case ["ps"]:
+                return Action()
         return Action(
             returncode=99, stderr=f"Error: Invalid command for {self.name} MockTool: {argv}\n"
         )

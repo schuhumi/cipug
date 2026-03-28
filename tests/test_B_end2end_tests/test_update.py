@@ -89,15 +89,14 @@ def test_update_podman_compose(
         # Check that the correct order and arguments of called tools. Changes in how cipug works may require
         # reordering/adjustments here!
         assert log.pop(0).cmdline == ["skopeo", "--version"]
-        if service_stop_start:
-            assert log.pop(0).cmdline == [container_tool, "--version"]
         if do_snapshot:
             assert log.pop(0).cmdline == ["snapper", "--version"]
             assert log.pop(0).cmdline == ["snapper", "--jsonout", "list-configs"]
         if prune_images:
             assert log.pop(0).cmdline == [container_tool, "image", "prune", "-f"]
+        assert log.pop(0).cmdline == [container_tool, "ps"]
+        assert log.pop(0).cmdline == [container_tool, "compose", "--version"]
         assert log.pop(0).cmdline[:3] == ["skopeo", "inspect", "--no-tags"]
-        assert log.pop(0).cmdline == [container_tool, "compose", "ps"]
         if do_snapshot:
             assert log.pop(0).cmdline[:4] == ["snapper", "-c", "envconf", "create"]
         assert log.pop(0).cmdline == [container_tool, "compose", "pull"]
