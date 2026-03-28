@@ -5,6 +5,7 @@ from .config import Config
 from .log import log
 from .service import Service
 from .tools.snapshot import snapshot_check_tools
+from .tools.version_modifier import Env, Quadlet, VersionModifierTool
 from .utils import get_services
 
 
@@ -12,7 +13,15 @@ class Snapshot_Checker:
     """For checking that recent enough snapshots exist."""
     def __init__(self):
         self.config = Config()
-        self.services: list[Service] = get_services()
+        vmt_cls: type[VersionModifierTool]
+        if "compose" in self.config["COMPOSE_TOOL"]:
+            vmt_cls = Env
+        elif self.config["COMPOSE_TOOL"] == "quadlet":
+            vmt_cls = Quadlet
+        else:
+            raise ValueError(f'Unknown CIPUG_COMPOSE_TOOL {self.config["COMPOSE_TOOL"]}')
+        vmt_cls.assert_dependencies()
+        self.services: list[Service] = get_services(vmt_cls)
 
     def check(self) -> bool:
         log("Configured snapshot checks:")

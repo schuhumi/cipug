@@ -98,6 +98,17 @@ class Env(VersionModifierTool):
         # We don't have any dependencies
         return
 
+    @classmethod
+    def check_if_folder_is_service(cls, path: Path) -> bool:
+        config = Config()
+        if not path.is_dir():
+            return False
+        if not (path / config["COMPOSE_FILE_NAME"]).is_file():
+            return False
+        if not (path / config["ENV_FILE_NAME"]).is_file():
+            return False
+        return True
+
     def __init__(
         self,
         svc: Service,

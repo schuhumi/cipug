@@ -69,7 +69,7 @@ Name | Purpose | Values | Default
 `CIPUG_SERVICES_FILTER_EXCLUDE` | Only work on a subset of the services | Comma-separated list of service names that shall be ignored | *unset*
 `CIPUG_COMPOSE_FILE_NAME` | What compose file to look out for at each service | Just the filename. This means all services need to have the same compose-file filename! | `compose.yml`
 `CIPUG_ENV_FILE_NAME` | What environment file to look out for at each service | Just the filename. This means all services need to have the same environment-file filename! | `.env`
-`CIPUG_COMPOSE_TOOL` | Used to stop (`down`) and start (`up -d`) services | `podman-compose`, `docker-compose`, `docker compose` or any other such tool| `podman-compose`
+`CIPUG_COMPOSE_TOOL` | Used to stop and start services | `podman-compose`, `docker-compose`, `docker compose` or `quadlet`| `podman-compose`
 `CIPUG_CONTAINER_TOOL` | Used to prune the images | `podman`, `docker` or any such tool | `podman`
 `CIPUG_SERVICE_STOP_START` | Whether to stop services before and start them up again after an image update | `true`/`false`, `0/`/`1` or `yes`/`no` (case insensitive) | `true`
 `CIPUG_STOP_START_METHOD` | Choose how to restart containers. This enables the use of systemd integration for podman compose. | `compose`: use `$CIPUG_COMPOSE_TOOL down` and `$CIPUG_COMPOSE_TOOL up -d`.<br/> `systemd-system` or `systemd-user`: use `systemctl [--user] restart $CIPUG_COMPOSE_TOOL@<service name>` | `compose`

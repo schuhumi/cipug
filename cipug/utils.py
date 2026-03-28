@@ -1,6 +1,6 @@
-import glob
-import os
 import subprocess
+
+from cipug.tools.version_modifier.base import VersionModifierTool
 
 from . import exit_code
 from .config import Config
@@ -8,7 +8,7 @@ from .log import log
 from .service import Service
 
 
-def get_services() -> list[Service]:
+def get_services(vmt_cls: type[VersionModifierTool]) -> list[Service]:
     config = Config()
     if not config["SERVICES_ROOT"].is_dir():
         log.error(
@@ -17,24 +17,12 @@ def get_services() -> list[Service]:
             exit_code=exit_code.DIRECTORY_NOT_FOUND
         )
 
-    pattern = os.path.join("*", config["COMPOSE_FILE_NAME"])
-    log.vverbose(
-        f"Searching for pattern \"{pattern}\" at {config['SERVICES_ROOT']}"
-    )
-
-    services: list[Service] = []  # list of folders with a compose and env file
-    for result in glob.glob(
-        pattern,
-        root_dir=config["SERVICES_ROOT"]
-    ):
-        compose_file = config["SERVICES_ROOT"] / result
-        env_file = compose_file.parent / config["ENV_FILE_NAME"]
-        if not env_file.is_file():
-            log.verbose(
-                f"Found {compose_file} but no {env_file}, skipping this folder"
-            )
+    services: list[Service] = []
+    for subdir in config["SERVICES_ROOT"].iterdir():
+        if not subdir.is_dir():
             continue
-        services.append(Service(compose_file.parent))
+        if vmt_cls.check_if_folder_is_service(subdir):
+            services.append(Service(subdir))
 
     if config["SERVICES_FILTER"] != "":
         filter = config["SERVICES_FILTER"].split(",")
@@ -63,16 +51,7 @@ def get_services() -> list[Service]:
 
 def check_dependencies():
     """Check if the required utilities can be run"""
-    config = Config()
     tools = ["skopeo"]
-
-    if config["SERVICE_STOP_START"]:
-        tools.append(config["COMPOSE_TOOL"].split(" ")[0])
-    else:
-        log.vverbose(
-            "Skipping looking for a compose tool, as stopping "
-            "and starting of services is disabled"
-        )
 
     for tool in tools:
         try:

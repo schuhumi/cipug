@@ -44,6 +44,10 @@ class VersionModifierPlaceholder(VersionModifierTool):
     def assert_dependencies(cls):
         return
 
+    @classmethod
+    def check_if_folder_is_service(cls, path: Path) -> bool:
+        return True
+
     def __init__(
         self,
         svc: Service,
