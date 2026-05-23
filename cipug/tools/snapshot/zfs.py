@@ -32,7 +32,7 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
                 exit_code=exit_code.DEPENDENCY_ERROR
             )
 
-    def create_snapshot(self, service: Service, message: str, image_hash: str | None = None):
+    def create_snapshot(self, service: Service, message: str):
         if not service.path.exists():
              raise FileNotFoundError(f"Service path {service.path} does not exist")
 
@@ -46,9 +46,6 @@ class Zfs(SnapshotCreationTool, SnapshotCheckTool):
 
         timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")
         snapshot_suffix = f"cipug-{timestamp}"
-
-        if image_hash:
-            snapshot_suffix += f"-{image_hash[:12]}"
 
         full_snapshot_name = f"{dataset}@{snapshot_suffix}"
 

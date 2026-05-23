@@ -10,7 +10,7 @@ from .log import log
 from .resolver import Image_Version_Resolver
 from .service import Service
 from .tools.snapshot import SnapshotCreationTool
-from .utils import clean_image_hash, get_services
+from .utils import get_services
 
 
 class Updater:
@@ -76,16 +76,13 @@ class Updater:
             return False
         return True
 
-    def _cater_for_snapshot(self, service: Service, env: Env) -> bool:
+    def _cater_for_snapshot(self, service: Service) -> bool:
         if self.snapshot_creation_tool is not None:
             log(f"Taking a snapshot of {service.path} using {self.snapshot_creation_tool.name}..")
             try:
-                # Try to get the hash for the service image
-                image_hash = env.get("_".join(["SERVICE", service.name.upper(), "IMAGE", "HASHED"]), None)
                 self.snapshot_creation_tool.create_snapshot(
                     service,
-                    message=f"Update container images {datetime.today()!s}",
-                    image_hash=clean_image_hash(image_hash)
+                    message=f"Update container images {datetime.today()!s}"
                 )
             except Exception as e:
                 log.error(f'Cannot update service "{service.name}", because snapshotting failed: {e}')
@@ -173,7 +170,7 @@ class Updater:
         if not self._check_permission_compose_tool(service):
             return exit_code.TOOL_ERROR
 
-        if not self._cater_for_snapshot(service, env):
+        if not self._cater_for_snapshot(service):
             return exit_code.SNAPSHOT_ERROR
 
         if not self._cater_for_updating_env_file(env, service):
