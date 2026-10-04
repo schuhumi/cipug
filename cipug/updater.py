@@ -87,6 +87,7 @@ class Updater:
 
     def update_all_services(self) -> list[exit_code.Exit_Code]:
         errors: list[exit_code.Exit_Code] = []
+        self.container_tool.cleanup()
         for service in self.services:
             e = self.update_service(service)
             if e is not None:

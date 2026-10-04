@@ -2,9 +2,15 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from pathlib import Path
 
+from cipug.config import Config
 from cipug.resolver import Image_Version_Resolver
 from cipug.service import Service
 from cipug.tools.version_modifier import ContainerVersion, VersionModifierTool
+
+
+def get_quadlet_dir(svc_path: Path) -> Path:
+    """The directory inside a service folder that holds the quadlet unit files."""
+    return svc_path / Config()["QUADLET_DIR"]
 
 
 class SystemdUnitEntry(ABC):
@@ -154,9 +160,8 @@ class ContainerFile(SystemdUnitFile):
 
     @property
     def container_name(self) -> str:
-        for entry in self.container:
-            if isinstance(entry, SystemdUnitKeyValue) and entry.name=="ContainerName":
-                return entry.value + ".service"
+        # The quadlet generator names the systemd unit after the unit file.
+        # (ContainerName= only names the container itself.)
         return self.path.stem + ".service"
 
 
@@ -170,7 +175,7 @@ class Quadlet(VersionModifierTool):
     def check_if_folder_is_service(cls, path: Path) -> bool:
         if not path.is_dir():
             return False
-        if len(list(path.glob("*.container"))) == 0:
+        if len(list(get_quadlet_dir(path).glob("*.container"))) == 0:
             return False
         return True
 
@@ -182,7 +187,7 @@ class Quadlet(VersionModifierTool):
         self.svc = svc
         self.resolver = resolver
         self.container_files: dict[str, ContainerFile] = {  # by name
-            each.name: ContainerFile(each) for each in self.svc.path.glob("*.container")
+            each.name: ContainerFile(each) for each in get_quadlet_dir(self.svc.path).glob("*.container")
         }
         self.container_versions: list[ContainerVersion] = []
         for name, cf in self.container_files.items():

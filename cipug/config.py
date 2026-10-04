@@ -44,6 +44,11 @@ class Literally(Generic[T]):
         return val
 
 
+def expand_path(val: str | Path) -> Path:
+    """Interpret config values as paths, resolving "~" to the user's home"""
+    return Path(val).expanduser()
+
+
 class Config(dict[str, Any]):
     """Get config for cipug from environment variables. This has
     nothing to do with the .env file for compose."""
@@ -65,6 +70,8 @@ class Config(dict[str, Any]):
             "PRUNE_IMAGES": ("true", Str2Bool),
             "COMPOSE_FILE_NAME": ("compose.yml", str),
             "ENV_FILE_NAME": (".env", str),
+            "QUADLET_DIR": ("quadlet", str),
+            "QUADLET_INSTALL_DIR": (expand_path("~/.config/containers/systemd"), expand_path),
             "CACHE_DURATION": (60 * 60, int),
             "CACHE_LOCATION": (Path(gettempdir()) / "cipug_cache.json", Path),
             **{
