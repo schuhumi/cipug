@@ -97,11 +97,12 @@ def test_config_loading(env_settings: dict[str, JsonBaseType], file_settings: di
                 assert val == file_settings[key]
                 continue
             # If the key wasn't present in any settings, it should be the default value.
-            # Special case: for default Path() objects we need to stringify them to compare
-            # (as they don't json-serialize)
+            # Special case: for default Path() objects we need to resolve and
+            # stringify them to compare (as --print-config-json resolves, and
+            # the paths don't json-serialize)
             val_default = Settings_Default[key]
             if isinstance(val_default, Path):
-                val_default = str(val_default)
+                val_default = str(val_default.resolve())
             assert val == val_default
 
 

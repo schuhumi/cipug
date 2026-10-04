@@ -8,6 +8,12 @@ class Systemctl(MockTool):
         match argv[1:]:
             case ["--user", "restart", _] | ["restart", _]:
                 return Action()
+            case ["--user", "start", *_] | ["start", *_]:
+                return Action()
+            case ["--user", "stop", *_] | ["stop", *_]:
+                return Action()
+            case ["--user", "daemon-reload"] | ["daemon-reload"]:
+                return Action()
         return Action(
             returncode=99, stderr="Error: Invalid command for systemd MockTool"
         )
