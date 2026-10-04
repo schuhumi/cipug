@@ -50,18 +50,6 @@ def test_zfs_snapshot():
         # Verify format: tank/services/immich@cipug-YYYY-MM-DD-HHMM
         assert snapshot_name.startswith("tank/services/immich@cipug-")
 
-        # Test snapshot with image hash
-        image_hash = "1234567890abcdef1234567890abcdef"
-        tool.create_snapshot(service, "test message", image_hash=image_hash)
-
-        log = e.log
-        assert len(log) == 5 # previous 3 + list + snapshot
-
-        snapshot_name_hash = log[4].argv[2]
-        # Verify format with hash: ...@cipug-2024-02-21-1500-1234567890ab
-        assert "1234567890ab" in snapshot_name_hash
-        assert "sha256:" not in snapshot_name_hash
-
         # Test get_last_snapshot_date
         last_date = tool.get_last_snapshot_date(service)
         assert last_date is not None
@@ -70,10 +58,10 @@ def test_zfs_snapshot():
 
         # Confirm it used the correct 'zfs list' commands
         log = e.log
-        # previous 5 + list dataset + list snapshots
-        assert len(log) == 7
-        assert log[5].argv[1:] == ["list", "-H", "-o", "name", str(service_example)]
-        assert log[6].argv[1:] == [
+        # previous 3 + list dataset + list snapshots
+        assert len(log) == 5
+        assert log[3].argv[1:] == ["list", "-H", "-o", "name", str(service_example)]
+        assert log[4].argv[1:] == [
             "list", "-t", "snapshot", "-H", "-o", "name,creation", "-p", "-d", "1", "tank/services/immich"
         ]
 

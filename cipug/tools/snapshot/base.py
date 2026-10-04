@@ -7,7 +7,7 @@ from cipug.tools import Tool
 
 class SnapshotCreationTool(Tool, ABC):
     @abstractmethod
-    def create_snapshot(self, service: Service, message: str, image_hash: str | None = None): ...
+    def create_snapshot(self, service: Service, message: str): ...
 
 
 class SnapshotCheckTool(Tool, ABC):
